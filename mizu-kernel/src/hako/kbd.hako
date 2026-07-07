@@ -1,0 +1,29 @@
+// Hako keyboard driver — PS/2 controller abstraction
+//
+// Auto-mode: inb/outb → hako_stdlib port I/O, init → keyboard_init
+// Block-mode: wraps PS/2 controller commands
+//
+// The Rust keyboard.rs calls these functions for initialization
+// and uses direct inline asm for port reads (Hako cannot return values yet).
+
+box kbd {
+  inb(p) => default
+  outb(v, p) => default
+  init => default
+
+  // Enable PS/2 controller: command 0xAE → port 0x64
+  enable {
+    kbd::outb(0xAE, 0x64)
+  }
+
+  // Set typematic rate: command 0xF3, rate 0x00 → port 0x60
+  set_rate {
+    kbd::outb(0xF3, 0x60)
+    kbd::outb(0x00, 0x60)
+  }
+
+  // Full keyboard setup (called from keyboard::init)
+  setup {
+    kbd::init()
+  }
+}

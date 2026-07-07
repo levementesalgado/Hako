@@ -1,0 +1,63 @@
+// Hako system configuration — PIC, PIT, CPU setup
+// Replaces Rust pic.rs, pit.rs, and sti in main.rs
+
+box sys {
+  inb(p) => default
+  outb(v, p) => default
+
+  // ── PIC (8259A) ──
+  // Remap IRQ0-7 → INT 0x20-0x27, IRQ8-15 → INT 0x28-0x2F
+
+  // ICW1: initialize both PICs
+  pic_icw1 {
+    sys::outb(0x11, 0x20)
+    sys::outb(0x11, 0xA0)
+  }
+
+  // ICW2: remap vectors (master→0x20, slave→0x28)
+  pic_icw2 {
+    sys::outb(0x20, 0x21)
+    sys::outb(0x28, 0xA1)
+  }
+
+  // ICW3: cascading (slave at IRQ2)
+  pic_icw3 {
+    sys::outb(0x04, 0x21)
+    sys::outb(0x02, 0xA1)
+  }
+
+  // ICW4: 8086 mode
+  pic_icw4 {
+    sys::outb(0x01, 0x21)
+    sys::outb(0x01, 0xA1)
+  }
+
+  // Set PIC masks (master only — slave stays 0xFF)
+  pic_mask(m: u32) {
+    sys::outb(m, 0x21)
+    sys::outb(0xFF, 0xA1)
+  }
+
+  // Full PIC init with default masks (unmask IRQ0+IRQ1: master=0xFC)
+  pic_init {
+    sys::pic_icw1()
+    sys::pic_icw2()
+    sys::pic_icw3()
+    sys::pic_icw4()
+    sys::pic_mask(0xFC)
+  }
+
+  // ── PIT (8253) ──
+  // Configure channel 0 at given frequency
+  pit_init(freq) {
+    sys::outb(0x36, 0x43)
+    sys::outb(1193180 / freq & 0xFF, 0x40)
+    sys::outb(1193180 / freq >> 8 & 0xFF, 0x40)
+  }
+
+  // ── CPU ──
+  // Enable interrupts (sti instruction)
+  sti raw {
+    "sti"
+  }
+}

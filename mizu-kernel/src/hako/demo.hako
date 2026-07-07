@@ -1,0 +1,56 @@
+// Hako demo — stdlib predefinitions
+// Auto-mode functions use hako_stdlib predefined implementations
+
+box serial {
+  COM1 = 0x3F8
+  COM2 = 0x2F8
+
+  config => default
+  write_byte(b) => default
+
+  run {
+    config()
+    write_byte(0x48)
+    write_byte(0x65)
+    write_byte(0x6C)
+    write_byte(0x6C)
+    write_byte(0x6F)
+    write_byte(0x0A)
+  }
+}
+
+box vga {
+  clear => default
+  write_str(s) => default
+
+  run {
+    clear()
+    write_str("[hako] stdlib auto mode\n")
+    write_str("[hako] serial writes via default\n")
+  }
+}
+
+box entry {
+  greet(s) {
+    vga::write_str(s)
+    vga::write_str("\n")
+  }
+}
+
+box output {
+  run {
+    entry::greet("[hako] flow OK")
+  }
+}
+
+box process {
+  run {
+    serial::run()
+    vga::run()
+    output::run()
+  }
+}
+
+flow default {
+  process
+}

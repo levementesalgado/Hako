@@ -1,11 +1,11 @@
 // Hako stdlib source — injected as a module into generated output
 pub const STDLIB: &str = r##"
 // --- Port I/O ---
-fn port_outb(value: u32, port: u32) {
+pub fn port_outb(value: u32, port: u32) {
     unsafe { core::arch::asm!("out dx, al", in("dx") port as u16, in("al") value as u8); }
 }
 
-fn port_inb(port: u32) -> u32 {
+pub fn port_inb(port: u32) -> u32 {
     let result: u8;
     unsafe { core::arch::asm!("in al, dx", in("dx") port as u16, out("al") result); }
     result as u32
@@ -43,15 +43,24 @@ pub fn vga_put_char(c: u32, x: u32, y: u32) {
     }
 }
 
+pub fn vga_read_cursor() -> (u32, u32) {
+    port_outb(14, 0x3D4);
+    let hi = port_inb(0x3D5);
+    port_outb(15, 0x3D4);
+    let lo = port_inb(0x3D5);
+    let pos = (hi << 8) | lo;
+    (pos % 80, pos / 80)
+}
+
 pub fn vga_write_str(s: &str) {
-    let mut x = 0u32;
-    let mut y = 0u32;
+    let (mut x, mut y) = vga_read_cursor();
     for c in s.bytes() {
         if c == b'\n' { x = 0; y += 1; continue; }
         vga_put_char(c as u32, x, y);
         x += 1;
         if x >= 80 { x = 0; y += 1; }
     }
+    vga_set_cursor(x, y);
 }
 
 pub fn vga_clear() {
@@ -61,6 +70,7 @@ pub fn vga_clear() {
             core::ptr::write_volatile(buf.add(i), 0x0720);
         }
     }
+    vga_set_cursor(0, 0);
 }
 
 pub fn vga_scroll() {

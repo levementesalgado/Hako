@@ -1,0 +1,160 @@
+// collatz.hako — Sequência de Collatz no Mizu
+// "Se um dia você provar a conjectura, pelo menos
+//  o Hako vai ter sido útil pra algo."
+//                                       — Lelouch vi Britannia, matemático
+
+box collatz {
+  MAX_N   = 10000        // range máximo para busca
+  WIDTH   = 16           // colunas na tabela VGA
+
+  // --- Sequência de Collatz pura ---
+  next(n) {
+    if n % 2 == 0 => { n / 2 }
+    else { 3 * n + 1 }
+  }
+
+  // --- Contagem de passos até 1 ---
+  stopping_time(n) {
+    mut steps = 0
+    mut x = n
+    loop {
+      if x == 1 => { break }
+      x = next(x)
+      steps = steps + 1
+    }
+    steps
+  }
+
+  // --- Sequência completa (array estático) ---
+  sequence(n, buf: &[u32]) {
+    mut x = n
+    mut i = 0
+    loop {
+      buf[i] = x
+      i = i + 1
+      if x == 1 => { break }
+      x = next(x)
+    }
+  }
+
+  // --- Mostra tabela de stopping times no VGA ---
+  show_table(max) {
+    vga::clear()
+    vga::write_str("Collatz: stopping times\n")
+    vga::write_str("n -> steps\n")
+    vga::write_str("----------------\n")
+    mut n = 1
+    loop {
+      if n > max => { break }
+      s = stopping_time(n)
+      // Formata: "NNN -> SSS\n"
+      vga::write_str(int_to_str(n))
+      vga::write_str(" -> ")
+      vga::write_str(int_to_str(s))
+      vga::write_str("\n")
+      n = n + 1
+    }
+    vga::write_str("Fim.\n")
+  }
+
+  // --- Envia CSV pela serial ---
+  send_csv(max) {
+    serial::write_str("n,steps,peak,parity_bits\n")
+    mut n = 1
+    loop {
+      if n > max => { break }
+      s = stopping_time(n)
+      p = peak(n)
+      bits = parity_pattern(n)
+      serial::write_str(int_to_str(n))
+      serial::write_str(",")
+      serial::write_str(int_to_str(s))
+      serial::write_str(",")
+      serial::write_str(int_to_str(p))
+      serial::write_str(",")
+      serial::write_str(int_to_str(bits))
+      serial::write_str("\n")
+      n = n + 1
+    }
+    serial::write_str("FIM\n")
+  }
+
+  // --- Pico da sequência ---
+  peak(n) {
+    mut x = n
+    mut max = n
+    loop {
+      if x == 1 => { break }
+      x = next(x)
+      if x > max => { max = x }
+    }
+    max
+  }
+
+  // --- Padrão de paridade como bits (0=even,1=odd) ---
+  parity_pattern(n) {
+    mut x = n
+    mut bits = 0u32
+    mut i = 0u32
+    loop {
+      if x == 1 => { break }
+      if x % 2 == 0 => { /* bit 0 */ }
+      else { bits = bits | (1 << i) }
+      x = next(x)
+      i = i + 1
+    }
+    bits
+  }
+
+  // --- Int para string (pra evitar alloc) ---
+  int_to_str(n) => default
+}
+
+// --- Extensão: int_to_str usando stdlib ---
+box collatz_ext::collatz {
+  int_to_str(mut n) {
+    mut buf: [u8; 12]
+    mut i = 0
+    if n == 0 { buf[0] = 48; i = 1 }
+    else {
+      while n > 0 {
+        buf[i] = 48 + (n % 10) as u8
+        n = n / 10
+        i = i + 1
+      }
+    }
+    // reverse
+    mut s = 0
+    mut e = i - 1
+    while s < e {
+      tmp = buf[s]
+      buf[s] = buf[e]
+      buf[e] = tmp
+      s = s + 1
+      e = e - 1
+    }
+    // "create" string from buffer
+    buf[i] = 0  // null terminator (não usado)
+    // usa vga_write_str com slice
+    vga::write_str(core::str::from_utf8(&buf[..i as usize]).unwrap_or("?"))
+  }
+}
+
+// --- Flow principal ---
+flow default {
+  collatz   // executa collatz::run()
+}
+
+// run() é chamado pelo flow
+box collatz {
+  run {
+    vga::init()
+    serial::config()
+    vga::write_str("Mizu Collatz Analyzer v0.1\n")
+    vga::write_str("Calculando stopping times...\n")
+    collatz::show_table(100)
+    // Envia CSV pela serial para coleta externa
+    serial::write_str("Iniciando envio CSV\n")
+    collatz::send_csv(1000)
+  }
+}

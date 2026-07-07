@@ -1,0 +1,13 @@
+[package]
+name = "mizu-sh"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+mizu-core = { path = "../mizu-core" }
+rustyline = "14"
+chrono = "0.4"
+regex-lite = "0.1"
+termion = "4"
+filetime = "0.2"
+libc = "0.2"

@@ -1,4 +1,4 @@
 [workspace]
 resolver = "2"
-members = ["mizu-core", "mizu-sh", "mizu-kernel", "hako"]
+members = ["mizu-core", "mizu-sh", "mizu-kernel", "mizu-init", "hako", "collatz-analyzer"]
 default-members = ["mizu-core", "mizu-sh"]

@@ -1,0 +1,10 @@
+[package]
+name = "mizu-kernel"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+mizu-core = { path = "../mizu-core", default-features = false }
+
+[build-dependencies]
+hako = { path = "../hako" }
