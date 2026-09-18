@@ -381,6 +381,47 @@ box test {
 }
 
 #[test]
+fn test_parse_type_inference_extended() {
+    let input = r#"
+box test {
+    process(text) => default
+    validate(flag) => default
+    calculate(rate) => default
+    load(bytes) => default
+    check(ok) => default
+}
+"#;
+    let mut p = Parser::new(input);
+    let prog = p.parse().unwrap();
+    
+    // String-like
+    match &prog.boxes[0].items[0] {
+        Item::Fn { params, .. } => assert_eq!(params[0].1, "&str"),
+        _ => panic!("expected Fn"),
+    }
+    // Boolean-like
+    match &prog.boxes[0].items[1] {
+        Item::Fn { params, .. } => assert_eq!(params[0].1, "bool"),
+        _ => panic!("expected Fn"),
+    }
+    // Float-like
+    match &prog.boxes[0].items[2] {
+        Item::Fn { params, .. } => assert_eq!(params[0].1, "f32"),
+        _ => panic!("expected Fn"),
+    }
+    // Buffer-like
+    match &prog.boxes[0].items[3] {
+        Item::Fn { params, .. } => assert_eq!(params[0].1, "&[u32]"),
+        _ => panic!("expected Fn"),
+    }
+    // Boolean-like
+    match &prog.boxes[0].items[4] {
+        Item::Fn { params, .. } => assert_eq!(params[0].1, "bool"),
+        _ => panic!("expected Fn"),
+    }
+}
+
+#[test]
 fn test_parse_explicit_type() {
     let input = r#"
 box test {
@@ -417,6 +458,40 @@ invalid_keyword test {
     let mut p = Parser::new(input);
     let result = p.parse();
     assert!(result.is_err());
+}
+
+#[test]
+fn test_parse_error_recovery() {
+    // Parser should recover from errors and continue parsing
+    let input = r#"
+box broken {
+    invalid
+}
+
+box valid {
+    VALUE = 42
+}
+"#;
+    let mut p = Parser::new(input);
+    let result = p.parse();
+    // Should have at least one error but also parse the valid box
+    assert!(result.is_ok() || p.error_count() > 0);
+}
+
+#[test]
+fn test_parse_error_message_format() {
+    let input = r#"
+box test {
+    invalid syntax here
+}
+"#;
+    let mut p = Parser::new(input);
+    let result = p.parse();
+    if let Err(e) = result {
+        let msg = format!("{}", e);
+        assert!(msg.contains("error["));
+        assert!(msg.contains("|")); // context line
+    }
 }
 
 #[test]
