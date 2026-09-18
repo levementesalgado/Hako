@@ -6,8 +6,19 @@ pub struct Codegen {
     box_consts: Vec<(String, String)>, // (name, value)
 }
 
+impl Default for Codegen {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Codegen {
-    pub fn new() -> Self { Self { result: String::new(), box_consts: Vec::new() } }
+    pub fn new() -> Self {
+        Self {
+            result: String::new(),
+            box_consts: Vec::new(),
+        }
+    }
 
     pub fn generate_full(&mut self, program: &Program) -> String {
         self.result.clear();
@@ -19,7 +30,8 @@ impl Codegen {
             } else {
                 b.name.clone()
             };
-            self.result.push_str(&format!("pub mod {} {{\n    use super::*;\n\n", mod_name));
+            self.result
+                .push_str(&format!("pub mod {} {{\n    use super::*;\n\n", mod_name));
             self.box_consts.clear();
 
             for item in &b.items {
@@ -30,14 +42,21 @@ impl Codegen {
                         } else {
                             "0".to_string()
                         };
-                        self.result.push_str(&format!("    pub const {}: u32 = {};\n", name, val_str));
+                        self.result
+                            .push_str(&format!("    pub const {}: u32 = {};\n", name, val_str));
                         self.box_consts.push((name.clone(), val_str));
                     }
-                    Item::Fn { name, params, mode, body } => {
+                    Item::Fn {
+                        name,
+                        params,
+                        mode,
+                        body,
+                    } => {
                         self.emit_fn(name, params, mode, body);
                     }
                     Item::Expr(e) => {
-                        self.result.push_str(&format!("    // side-effect: {}\n", e));
+                        self.result
+                            .push_str(&format!("    // side-effect: {}\n", e));
                     }
                 }
             }
@@ -46,7 +65,8 @@ impl Codegen {
 
         // Generate flows
         for fl in &program.flows {
-            self.result.push_str(&format!("pub fn flow_{}() {{\n", fl.name));
+            self.result
+                .push_str(&format!("pub fn flow_{}() {{\n", fl.name));
             for step in &fl.steps {
                 self.result.push_str(&format!("    {}::run();\n", step));
             }
@@ -59,7 +79,9 @@ impl Codegen {
     fn emit_fn(&mut self, name: &str, params: &[(String, String)], mode: &FnMode, body: &[Stmt]) {
         self.result.push_str(&format!("    pub fn {}(", name));
         for (i, (p, pt)) in params.iter().enumerate() {
-            if i > 0 { self.result.push_str(", "); }
+            if i > 0 {
+                self.result.push_str(", ");
+            }
             self.result.push_str(p);
             self.result.push_str(": ");
             self.result.push_str(pt);
@@ -69,15 +91,20 @@ impl Codegen {
         match mode {
             FnMode::Auto => {
                 let (stdlib_fn, extra_args) = self.auto_fn_info(name);
-                self.result.push_str(&format!("        crate::hako_stdlib::{}(", stdlib_fn));
+                self.result
+                    .push_str(&format!("        crate::hako_stdlib::{}(", stdlib_fn));
                 // User params first (just the name, not the type)
                 for (i, (p, _)) in params.iter().enumerate() {
-                    if i > 0 { self.result.push_str(", "); }
+                    if i > 0 {
+                        self.result.push_str(", ");
+                    }
                     self.result.push_str(p);
                 }
                 // Then extra args from box constants
                 for a in &extra_args {
-                    if !params.is_empty() { self.result.push_str(", "); }
+                    if !params.is_empty() {
+                        self.result.push_str(", ");
+                    }
                     self.result.push_str(a);
                 }
                 // No args at all — close cleanly
@@ -107,7 +134,7 @@ impl Codegen {
     fn emit_raw_block(&mut self, body: &[Stmt]) {
         // Collect asm operands and template lines
         let mut outputs: Vec<(String, String)> = Vec::new(); // (reg, var)
-        let mut inputs: Vec<(String, String)> = Vec::new();  // (reg, var)
+        let mut inputs: Vec<(String, String)> = Vec::new(); // (reg, var)
         let mut asm_lines: Vec<String> = Vec::new();
 
         for stmt in body {
@@ -127,37 +154,51 @@ impl Codegen {
         // Generate let mut for outputs
         for (reg, var) in &outputs {
             let ty = Self::reg_type(reg);
-            self.result.push_str(&format!("        let mut __out_{}: {};\n", var, ty));
+            self.result
+                .push_str(&format!("        let mut __out_{}: {};\n", var, ty));
         }
 
         // Build asm!() call
-        self.result.push_str("        unsafe {\n            core::arch::asm!(\n");
+        self.result
+            .push_str("        unsafe {\n            core::arch::asm!(\n");
 
         let mut needs_comma = false;
 
         // Template strings
         for line in &asm_lines {
-            if needs_comma { self.result.push_str(",\n"); }
-            self.result.push_str(&format!("                \"{}\"", line));
+            if needs_comma {
+                self.result.push_str(",\n");
+            }
+            self.result
+                .push_str(&format!("                \"{}\"", line));
             needs_comma = true;
         }
 
         // Input operands
         for (reg, var) in &inputs {
-            if needs_comma { self.result.push_str(",\n"); }
+            if needs_comma {
+                self.result.push_str(",\n");
+            }
             let ty = Self::reg_type(reg);
             if ty == "u32" {
-                self.result.push_str(&format!("                in(\"{}\") {}", reg, var));
+                self.result
+                    .push_str(&format!("                in(\"{}\") {}", reg, var));
             } else {
-                self.result.push_str(&format!("                in(\"{}\") {} as {}", reg, var, ty));
+                self.result.push_str(&format!(
+                    "                in(\"{}\") {} as {}",
+                    reg, var, ty
+                ));
             }
             needs_comma = true;
         }
 
         // Output operands
         for (reg, var) in &outputs {
-            if needs_comma { self.result.push_str(",\n"); }
-            self.result.push_str(&format!("                out(\"{}\") __out_{}", reg, var));
+            if needs_comma {
+                self.result.push_str(",\n");
+            }
+            self.result
+                .push_str(&format!("                out(\"{}\") __out_{}", reg, var));
             needs_comma = true;
         }
 
@@ -165,7 +206,8 @@ impl Codegen {
 
         // Assign outputs back to original variable names
         for (_, var) in &outputs {
-            self.result.push_str(&format!("        let {} = __out_{};\n", var, var));
+            self.result
+                .push_str(&format!("        let {} = __out_{};\n", var, var));
         }
     }
 
@@ -192,25 +234,33 @@ impl Codegen {
         match stmt {
             Stmt::If { cond, then, r#else } => {
                 let mut s = format!("{}if {} {{\n", ind, cond);
-                for st in then { s.push_str(&self.stmt_str(st, indent + 1)); }
+                for st in then {
+                    s.push_str(&self.stmt_str(st, indent + 1));
+                }
                 if r#else.is_empty() {
                     s.push_str(&format!("{}}}\n", ind));
                 } else {
                     s.push_str(&format!("{}}} else {{\n", ind));
-                    for st in r#else { s.push_str(&self.stmt_str(st, indent + 1)); }
+                    for st in r#else {
+                        s.push_str(&self.stmt_str(st, indent + 1));
+                    }
                     s.push_str(&format!("{}}}\n", ind));
                 }
                 s
             }
             Stmt::Loop(body) => {
                 let mut s = format!("{}loop {{\n", ind);
-                for st in body { s.push_str(&self.stmt_str(st, indent + 1)); }
+                for st in body {
+                    s.push_str(&self.stmt_str(st, indent + 1));
+                }
                 s.push_str(&format!("{}}}\n", ind));
                 s
             }
             Stmt::For { var, iter, body } => {
                 let mut s = format!("{}for {} in {} {{\n", ind, var, iter);
-                for st in body { s.push_str(&self.stmt_str(st, indent + 1)); }
+                for st in body {
+                    s.push_str(&self.stmt_str(st, indent + 1));
+                }
                 s.push_str(&format!("{}}}\n", ind));
                 s
             }
@@ -219,7 +269,9 @@ impl Codegen {
             Stmt::Expr(e) => format!("{}{};\n", ind, e),
             Stmt::Block(body) => {
                 let mut s = format!("{} {{\n", ind);
-                for st in body { s.push_str(&self.stmt_str(st, indent + 1)); }
+                for st in body {
+                    s.push_str(&self.stmt_str(st, indent + 1));
+                }
                 s.push_str(&format!("{}}}\n", ind));
                 s
             }

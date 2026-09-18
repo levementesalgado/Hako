@@ -1,7 +1,7 @@
-use hako::transpile_string;
-use std::path::Path;
 use hako::transpile_file;
+use hako::transpile_string;
 use std::fs;
+use std::path::Path;
 
 // ===== Integration Tests =====
 
@@ -43,7 +43,7 @@ flow default {
 }
 "#;
     let (code, _, _) = transpile_string(input).unwrap();
-    
+
     // Check that the output contains valid Rust syntax
     assert!(code.contains("pub mod serial {"));
     assert!(code.contains("pub mod vga {"));
@@ -62,7 +62,7 @@ flow default {
 fn test_transpile_file() {
     let input_path = Path::new("/tmp/test_input.hako");
     let output_path = Path::new("/tmp/test_output.rs");
-    
+
     let input = r#"
 box test {
     VALUE = 42
@@ -71,19 +71,19 @@ box test {
     }
 }
 "#;
-    
+
     fs::write(input_path, input).unwrap();
     let result = transpile_file(input_path, output_path);
     assert!(result.is_ok());
-    
+
     let (boxes, flows) = result.unwrap();
     assert_eq!(boxes, 1);
     assert_eq!(flows, 0);
-    
+
     let output = fs::read_to_string(output_path).unwrap();
     assert!(output.contains("pub const VALUE: u32 = 42;"));
     assert!(output.contains("pub fn run()"));
-    
+
     // Cleanup
     let _ = fs::remove_file(input_path);
     let _ = fs::remove_file(output_path);

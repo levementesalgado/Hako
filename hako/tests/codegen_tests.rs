@@ -1,5 +1,5 @@
-use hako::parser::Parser;
 use hako::codegen::Codegen;
+use hako::parser::Parser;
 
 // ===== Codegen Tests =====
 

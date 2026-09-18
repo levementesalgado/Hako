@@ -1,5 +1,5 @@
-use hako::parser::Parser;
 use hako::ast::*;
+use hako::parser::Parser;
 
 // ===== Parser Tests =====
 
@@ -73,7 +73,9 @@ box serial {
     let prog = p.parse().unwrap();
     assert_eq!(prog.boxes[0].items.len(), 2);
     match &prog.boxes[0].items[0] {
-        Item::Fn { name, params, mode, .. } => {
+        Item::Fn {
+            name, params, mode, ..
+        } => {
             assert_eq!(name, "config");
             assert!(params.is_empty());
             assert!(matches!(mode, FnMode::Auto));
@@ -81,7 +83,9 @@ box serial {
         _ => panic!("expected Fn"),
     }
     match &prog.boxes[0].items[1] {
-        Item::Fn { name, params, mode, .. } => {
+        Item::Fn {
+            name, params, mode, ..
+        } => {
             assert_eq!(name, "write_byte");
             assert_eq!(params.len(), 1);
             assert_eq!(params[0].0, "b");
@@ -104,7 +108,9 @@ box test {
     let mut p = Parser::new(input);
     let prog = p.parse().unwrap();
     match &prog.boxes[0].items[0] {
-        Item::Fn { name, mode, body, .. } => {
+        Item::Fn {
+            name, mode, body, ..
+        } => {
             assert_eq!(name, "run");
             assert!(matches!(mode, FnMode::Block));
             assert_eq!(body.len(), 2);
@@ -127,13 +133,17 @@ box test {
     let mut p = Parser::new(input);
     let prog = p.parse().unwrap();
     match &prog.boxes[0].items[0] {
-        Item::Fn { name, mode, body, .. } => {
+        Item::Fn {
+            name, mode, body, ..
+        } => {
             assert_eq!(name, "asm_test");
             assert!(matches!(mode, FnMode::Raw));
             assert_eq!(body.len(), 3);
             assert!(matches!(&body[0], Stmt::AsmOut { reg, var } if reg == "al" && var == "x"));
             assert!(matches!(&body[1], Stmt::AsmLine(s) if s == "mov eax, 1"));
-            assert!(matches!(&body[2], Stmt::AsmIn { reg, var } if reg == "eax" && var == "result"));
+            assert!(
+                matches!(&body[2], Stmt::AsmIn { reg, var } if reg == "eax" && var == "result")
+            );
         }
         _ => panic!("expected Fn"),
     }
@@ -233,16 +243,14 @@ box test {
     let mut p = Parser::new(input);
     let prog = p.parse().unwrap();
     match &prog.boxes[0].items[0] {
-        Item::Fn { body, .. } => {
-            match &body[0] {
-                Stmt::For { var, iter, body } => {
-                    assert_eq!(var, "i");
-                    assert_eq!(iter, "0..10");
-                    assert_eq!(body.len(), 1);
-                }
-                _ => panic!("expected For"),
+        Item::Fn { body, .. } => match &body[0] {
+            Stmt::For { var, iter, body } => {
+                assert_eq!(var, "i");
+                assert_eq!(iter, "0..10");
+                assert_eq!(body.len(), 1);
             }
-        }
+            _ => panic!("expected For"),
+        },
         _ => panic!("expected Fn"),
     }
 }
@@ -278,15 +286,13 @@ box test {
     let mut p = Parser::new(input);
     let prog = p.parse().unwrap();
     match &prog.boxes[0].items[0] {
-        Item::Fn { body, .. } => {
-            match &body[0] {
-                Stmt::Assign { var, value } => {
-                    assert_eq!(var, "x");
-                    assert_eq!(value, "10 + 20");
-                }
-                _ => panic!("expected Assign"),
+        Item::Fn { body, .. } => match &body[0] {
+            Stmt::Assign { var, value } => {
+                assert_eq!(var, "x");
+                assert_eq!(value, "10 + 20");
             }
-        }
+            _ => panic!("expected Assign"),
+        },
         _ => panic!("expected Fn"),
     }
 }
@@ -393,7 +399,7 @@ box test {
 "#;
     let mut p = Parser::new(input);
     let prog = p.parse().unwrap();
-    
+
     // String-like
     match &prog.boxes[0].items[0] {
         Item::Fn { params, .. } => assert_eq!(params[0].1, "&str"),
@@ -510,15 +516,13 @@ box test {
     let mut p = Parser::new(input);
     let prog = p.parse().unwrap();
     match &prog.boxes[0].items[0] {
-        Item::Fn { body, .. } => {
-            match &body[0] {
-                Stmt::If { then, .. } => {
-                    assert_eq!(then.len(), 1);
-                    assert!(matches!(&then[0], Stmt::If { .. }));
-                }
-                _ => panic!("expected If"),
+        Item::Fn { body, .. } => match &body[0] {
+            Stmt::If { then, .. } => {
+                assert_eq!(then.len(), 1);
+                assert!(matches!(&then[0], Stmt::If { .. }));
             }
-        }
+            _ => panic!("expected If"),
+        },
         _ => panic!("expected Fn"),
     }
 }
@@ -535,7 +539,12 @@ box test {
     let mut p = Parser::new(input);
     let prog = p.parse().unwrap();
     match &prog.boxes[0].items[0] {
-        Item::Fn { name, params, mode, body } => {
+        Item::Fn {
+            name,
+            params,
+            mode,
+            body,
+        } => {
             assert_eq!(name, "add");
             assert_eq!(params.len(), 2);
             assert_eq!(params[0], ("a".to_string(), "u32".to_string()));

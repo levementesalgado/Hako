@@ -20,12 +20,18 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
 
     if args.len() > 1 && args[1] == "--record" {
-        let limit: u64 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(10_000_000);
+        let limit: u64 = args
+            .get(2)
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(10_000_000);
         find_records(limit);
         return;
     }
     if args.len() > 1 && args[1] == "--csv" {
-        let limit: u64 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(1_000_000);
+        let limit: u64 = args
+            .get(2)
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(1_000_000);
         export_csv(limit);
         return;
     }
@@ -86,7 +92,10 @@ fn main() {
     }
     if args.len() > 1 && args[1] == "--tree" {
         let max_k: usize = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(12);
-        let limit: u64 = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(10_000_000);
+        let limit: u64 = args
+            .get(3)
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(10_000_000);
         collatz_inverse_tree(max_k, limit);
         return;
     }
@@ -97,7 +106,10 @@ fn main() {
         return;
     }
     if args.len() > 1 && args[1] == "--layers" {
-        let limit: u64 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(1_000_000);
+        let limit: u64 = args
+            .get(2)
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(1_000_000);
         let max_check: u64 = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(limit);
         branch_layer_test(limit, max_check);
         return;
@@ -112,7 +124,10 @@ fn main() {
     // Default: full report
     println!("🧮 Collatz Analyzer — Mizu Labs");
     println!("{}", "─".repeat(60));
-    println!("Uso: {} <comando> [limite]", args.get(0).unwrap_or(&"collatz".into()));
+    println!(
+        "Uso: {} <comando> [limite]",
+        args.get(0).unwrap_or(&"collatz".into())
+    );
     println!();
     println!("Comandos:");
     println!("  --csv      <N>  Exporta CSV: n,steps,peak,popcount,trailing_zeros,residue4");
@@ -134,8 +149,14 @@ fn main() {
     println!("  --ml       <N>  Exporta features para ML (alimenta mycelium-net)");
     println!();
     println!("Exemplos:");
-    println!("  {} --csv 1000000 > dados.csv", args.get(0).unwrap_or(&"collatz".into()));
-    println!("  {} --record 10000000", args.get(0).unwrap_or(&"collatz".into()));
+    println!(
+        "  {} --csv 1000000 > dados.csv",
+        args.get(0).unwrap_or(&"collatz".into())
+    );
+    println!(
+        "  {} --record 10000000",
+        args.get(0).unwrap_or(&"collatz".into())
+    );
 }
 
 // ─── Core: stopping time with cache ─────────────────────
@@ -144,8 +165,12 @@ fn main() {
 // nesse caso, usar vetor linear.
 
 fn stopping_time_cached(n: u64, cache: &mut HashMap<u64, u64>) -> u64 {
-    if n == 1 { return 0; }
-    if let Some(&s) = cache.get(&n) { return s; }
+    if n == 1 {
+        return 0;
+    }
+    if let Some(&s) = cache.get(&n) {
+        return s;
+    }
     let steps = if n % 2 == 0 {
         1 + stopping_time_cached(n / 2, cache)
     } else {
@@ -156,10 +181,14 @@ fn stopping_time_cached(n: u64, cache: &mut HashMap<u64, u64>) -> u64 {
 }
 
 fn stopping_time_vec(n: u64, cache: &mut [u64]) -> u64 {
-    if n == 1 { return 0; }
+    if n == 1 {
+        return 0;
+    }
     let idx = n as usize;
     if idx < cache.len() {
-        if cache[idx] != 0 { return cache[idx]; }
+        if cache[idx] != 0 {
+            return cache[idx];
+        }
         let steps = if n % 2 == 0 {
             1 + stopping_time_vec(n / 2, cache)
         } else {
@@ -182,7 +211,9 @@ fn peak(n: u64) -> u64 {
     let mut max = n;
     while x > 1 {
         x = if x % 2 == 0 { x / 2 } else { 3 * x + 1 };
-        if x > max { max = x; }
+        if x > max {
+            max = x;
+        }
     }
     max
 }
@@ -215,7 +246,18 @@ fn parity_sequence(n: u64) -> Vec<u8> {
 fn export_csv(limit: u64) {
     let mut cache = vec![0u64; (limit as usize).min(100_000_000)];
     let mut wtr = csv::Writer::from_writer(std::io::stdout());
-    wtr.write_record(&["n","steps","peak","popcount","trailing_zeros","residue2","residue4","residue8","residue16"]).unwrap();
+    wtr.write_record(&[
+        "n",
+        "steps",
+        "peak",
+        "popcount",
+        "trailing_zeros",
+        "residue2",
+        "residue4",
+        "residue8",
+        "residue16",
+    ])
+    .unwrap();
 
     for n in 1..=limit {
         let s = if (n as usize) < cache.len() {
@@ -236,7 +278,8 @@ fn export_csv(limit: u64) {
             &(n % 4).to_string(),
             &(n % 8).to_string(),
             &(n % 16).to_string(),
-        ]).unwrap();
+        ])
+        .unwrap();
     }
     wtr.flush().unwrap();
     eprintln!("CSV exportado: {} linhas", limit);
@@ -265,8 +308,14 @@ fn find_records(limit: u64) {
             let p = peak(n);
             // highest power of 2 dividing n
             let tz = trailing_zeros(n);
-            println!("{:>8} {:>8} {:>10}  n/2^{:<2}  {:>3} ones",
-                record_n, record, p, tz, popcount(n));
+            println!(
+                "{:>8} {:>8} {:>10}  n/2^{:<2}  {:>3} ones",
+                record_n,
+                record,
+                p,
+                tz,
+                popcount(n)
+            );
         }
     }
 
@@ -279,9 +328,17 @@ fn find_records(limit: u64) {
     println!("Recordistas são próximos de 2^k - 1?");
     let mut n = record_n;
     let mut k = 0;
-    while n > 0 { n >>= 1; k += 1; }
-    println!("  {} ≈ 2^{} - {} (diferença de {})",
-        record_n, k, (1u64 << k) - record_n, (1u64 << k) - 1 - record_n);
+    while n > 0 {
+        n >>= 1;
+        k += 1;
+    }
+    println!(
+        "  {} ≈ 2^{} - {} (diferença de {})",
+        record_n,
+        k,
+        (1u64 << k) - record_n,
+        (1u64 << k) - 1 - record_n
+    );
 }
 
 // ─── Análise de Fourier da paridade ─────────────────────
@@ -308,7 +365,7 @@ fn fourier_analysis(limit: u64) {
         if !bits.is_empty() {
             let mut run = 1u64;
             for i in 1..bits.len() {
-                if bits[i] == bits[i-1] {
+                if bits[i] == bits[i - 1] {
                     run += 1;
                 } else {
                     run_lengths.push(run);
@@ -320,10 +377,24 @@ fn fourier_analysis(limit: u64) {
     }
 
     let total = total_zeros + total_ones;
-    println!("Distribuição paridade (amostra {} números):", limit.min(10_000));
-    println!("  Even steps (0): {} ({:.1}%)", total_zeros, total_zeros as f64 / total as f64 * 100.0);
-    println!("  Odd steps  (1): {} ({:.1}%)", total_ones, total_ones as f64 / total as f64 * 100.0);
-    println!("  Razão even/odd: {:.4}", total_zeros as f64 / total_ones.max(1) as f64);
+    println!(
+        "Distribuição paridade (amostra {} números):",
+        limit.min(10_000)
+    );
+    println!(
+        "  Even steps (0): {} ({:.1}%)",
+        total_zeros,
+        total_zeros as f64 / total as f64 * 100.0
+    );
+    println!(
+        "  Odd steps  (1): {} ({:.1}%)",
+        total_ones,
+        total_ones as f64 / total as f64 * 100.0
+    );
+    println!(
+        "  Razão even/odd: {:.4}",
+        total_zeros as f64 / total_ones.max(1) as f64
+    );
 
     if !run_lengths.is_empty() {
         let avg_run = run_lengths.iter().sum::<u64>() as f64 / run_lengths.len() as f64;
@@ -360,13 +431,21 @@ fn correlate_binary(limit: u64) {
     println!("{}", "─".repeat(60));
 
     for (pc, values) in buckets.iter().enumerate() {
-        if values.is_empty() { continue; }
+        if values.is_empty() {
+            continue;
+        }
         let sum: u64 = values.iter().sum();
         let mean = sum as f64 / values.len() as f64;
         let min = values.iter().min().unwrap();
         let max = values.iter().max().unwrap();
-        println!("  {:>3}     {:>8.2}  {:>5}  {:>5}  {:>5} amostras",
-            pc, mean, min, max, values.len());
+        println!(
+            "  {:>3}     {:>8.2}  {:>5}  {:>5}  {:>5} amostras",
+            pc,
+            mean,
+            min,
+            max,
+            values.len()
+        );
     }
 
     // Correlação com trailing zeros
@@ -387,38 +466,53 @@ fn correlate_binary(limit: u64) {
     }
 
     for (tz, values) in tz_buckets.iter().enumerate() {
-        if values.is_empty() { continue; }
+        if values.is_empty() {
+            continue;
+        }
         let sum: u64 = values.iter().sum();
         let mean = sum as f64 / values.len() as f64;
-        println!("  {:>3}     {:>8.2}   {:>5} amostras", tz, mean, values.len());
+        println!(
+            "  {:>3}     {:>8.2}   {:>5} amostras",
+            tz,
+            mean,
+            values.len()
+        );
     }
 
     // Previsão linear simples: S(n) ≈ a * popcount(n) + b * trailing_zeros(n) + c
     println!();
     println!("Modelo linear: S(n) ≈ a·popcount + b·trailing_zeros + c");
     // Usa amostra para estimar
-    let sample: Vec<(u64, u64, u64, u64)> = (1..=limit.min(100_000)).map(|n| {
-        let s = if (n as usize) < cache.len() {
-            cache[n as usize]
-        } else {
-            stopping_time_cached(n, &mut HashMap::new())
-        };
-        (n, s, popcount(n) as u64, trailing_zeros(n) as u64)
-    }).collect();
+    let sample: Vec<(u64, u64, u64, u64)> = (1..=limit.min(100_000))
+        .map(|n| {
+            let s = if (n as usize) < cache.len() {
+                cache[n as usize]
+            } else {
+                stopping_time_cached(n, &mut HashMap::new())
+            };
+            (n, s, popcount(n) as u64, trailing_zeros(n) as u64)
+        })
+        .collect();
 
     let n_samples = sample.len() as f64;
     if n_samples > 0.0 {
         let (mean_s, mean_pc, mean_tz) = {
-            let mut ss = 0.0; let mut sp = 0.0; let mut st = 0.0;
+            let mut ss = 0.0;
+            let mut sp = 0.0;
+            let mut st = 0.0;
             for &(_, s, pc, tz) in &sample {
-                ss += s as f64; sp += pc as f64; st += tz as f64;
+                ss += s as f64;
+                sp += pc as f64;
+                st += tz as f64;
             }
             (ss / n_samples, sp / n_samples, st / n_samples)
         };
 
         // Covariâncias
-        let mut cov_sp = 0.0; let mut cov_st = 0.0;
-        let mut var_pc = 0.0; let mut var_tz = 0.0;
+        let mut cov_sp = 0.0;
+        let mut cov_st = 0.0;
+        let mut var_pc = 0.0;
+        let mut var_tz = 0.0;
         let mut cov_pc_tz = 0.0;
         for &(_, s, pc, tz) in &sample {
             let ds = s as f64 - mean_s;
@@ -440,7 +534,10 @@ fn correlate_binary(limit: u64) {
             println!("  a (popcount) = {:.4}", a);
             println!("  b (trailing_zeros) = {:.4}", b);
             println!("  c (constante) = {:.4}", c);
-            println!("  S(n) ≈ {:.4}·popcount + {:.4}·trailing_zeros + {:.4}", a, b, c);
+            println!(
+                "  S(n) ≈ {:.4}·popcount + {:.4}·trailing_zeros + {:.4}",
+                a, b, c
+            );
 
             // Erro médio
             let mut mae = 0.0;
@@ -449,7 +546,10 @@ fn correlate_binary(limit: u64) {
                 mae += (s as f64 - pred).abs();
             }
             println!("  Erro médio absoluto: {:.4}", mae / n_samples);
-            println!("  Erro relativo médio: {:.2}%", mae / n_samples / mean_s * 100.0);
+            println!(
+                "  Erro relativo médio: {:.2}%",
+                mae / n_samples / mean_s * 100.0
+            );
         }
     }
 }
@@ -474,10 +574,16 @@ fn diff_analysis(limit: u64) {
     // Histograma das diferenças
     let mut diff_hist: HashMap<i64, u64> = HashMap::new();
     for n in 1..limit {
-        let s1 = if (n as usize) < cache.len() { cache[n as usize] }
-                 else { stopping_time_cached(n, &mut HashMap::new()) };
-        let s2 = if ((n+1) as usize) < cache.len() { cache[(n+1) as usize] }
-                 else { stopping_time_cached(n+1, &mut HashMap::new()) };
+        let s1 = if (n as usize) < cache.len() {
+            cache[n as usize]
+        } else {
+            stopping_time_cached(n, &mut HashMap::new())
+        };
+        let s2 = if ((n + 1) as usize) < cache.len() {
+            cache[(n + 1) as usize]
+        } else {
+            stopping_time_cached(n + 1, &mut HashMap::new())
+        };
         let diff = s2 as i64 - s1 as i64;
         *diff_hist.entry(diff).or_insert(0) += 1;
     }
@@ -498,15 +604,25 @@ fn diff_analysis(limit: u64) {
         let mut sum_diff: i64 = 0;
         let mut cnt = 0u64;
         for n in (1..limit).filter(|n| n % 4 == r) {
-            let s1 = if (n as usize) < cache.len() { cache[n as usize] }
-                     else { stopping_time_cached(n, &mut HashMap::new()) };
-            let s2 = if ((n+1) as usize) < cache.len() { cache[(n+1) as usize] }
-                     else { stopping_time_cached(n+1, &mut HashMap::new()) };
+            let s1 = if (n as usize) < cache.len() {
+                cache[n as usize]
+            } else {
+                stopping_time_cached(n, &mut HashMap::new())
+            };
+            let s2 = if ((n + 1) as usize) < cache.len() {
+                cache[(n + 1) as usize]
+            } else {
+                stopping_time_cached(n + 1, &mut HashMap::new())
+            };
             sum_diff += s2 as i64 - s1 as i64;
             cnt += 1;
         }
         if cnt > 0 {
-            println!("  n ≡ {} mod 4: média ΔS = {:.4}", r, sum_diff as f64 / cnt as f64);
+            println!(
+                "  n ≡ {} mod 4: média ΔS = {:.4}",
+                r,
+                sum_diff as f64 / cnt as f64
+            );
         }
     }
 
@@ -527,11 +643,17 @@ fn diff_analysis(limit: u64) {
     println!();
     println!("Primeiras 200 diferenças (visualização ASCII):");
     let mut line = String::new();
-    for n in 1..=200.min(limit-1) {
-        let s1 = if (n as usize) < cache.len() { cache[n as usize] }
-                 else { stopping_time_cached(n, &mut HashMap::new()) };
-        let s2 = if ((n+1) as usize) < cache.len() { cache[(n+1) as usize] }
-                 else { stopping_time_cached(n+1, &mut HashMap::new()) };
+    for n in 1..=200.min(limit - 1) {
+        let s1 = if (n as usize) < cache.len() {
+            cache[n as usize]
+        } else {
+            stopping_time_cached(n, &mut HashMap::new())
+        };
+        let s2 = if ((n + 1) as usize) < cache.len() {
+            cache[(n + 1) as usize]
+        } else {
+            stopping_time_cached(n + 1, &mut HashMap::new())
+        };
         let diff = s2 as i64 - s1 as i64;
         let c = match diff {
             -5..=-1 => '.',
@@ -541,12 +663,12 @@ fn diff_analysis(limit: u64) {
         };
         line.push(c);
         if n % 100 == 0 {
-            println!("{:>6}: {}", n-99, line);
+            println!("{:>6}: {}", n - 99, line);
             line.clear();
         }
     }
     if !line.is_empty() {
-        println!("{:>6}: {}", (200/100)*100 + 1, line);
+        println!("{:>6}: {}", (200 / 100) * 100 + 1, line);
     }
 }
 
@@ -595,7 +717,10 @@ fn build_predictor(limit: u64) {
             15 => (5, "(3n+1)/8"),
             _ => unreachable!(),
         };
-        println!("  n≡{:>2} |  {}+  | {} | S(n) = {} + S(n')", r, delta, next_formula, delta);
+        println!(
+            "  n≡{:>2} |  {}+  | {} | S(n) = {} + S(n')",
+            r, delta, next_formula, delta
+        );
     }
 
     println!();
@@ -608,20 +733,37 @@ fn build_predictor(limit: u64) {
 
     for r in 0..16u64 {
         let ns: Vec<u64> = (1..=limit).filter(|n| n % 16 == r).collect();
-        if ns.is_empty() { continue; }
+        if ns.is_empty() {
+            continue;
+        }
 
         let delta = match r {
-            0 => 4, 1 => 3, 2 => 1, 3 => 5,
-            4 => 2, 5 => 4, 6 => 2, 7 => 5,
-            8 => 3, 9 => 4, 10 => 1, 11 => 5,
-            12 => 2, 13 => 4, 14 => 1, 15 => 5,
+            0 => 4,
+            1 => 3,
+            2 => 1,
+            3 => 5,
+            4 => 2,
+            5 => 4,
+            6 => 2,
+            7 => 5,
+            8 => 3,
+            9 => 4,
+            10 => 1,
+            11 => 5,
+            12 => 2,
+            13 => 4,
+            14 => 1,
+            15 => 5,
             _ => 0,
         };
 
         let mut errors = Vec::new();
         for &n in &ns {
-            let s_real = if (n as usize) < cache.len() { cache[n as usize] }
-                         else { stopping_time_cached(n, &mut HashMap::new()) };
+            let s_real = if (n as usize) < cache.len() {
+                cache[n as usize]
+            } else {
+                stopping_time_cached(n, &mut HashMap::new())
+            };
 
             // Previsão: S(n) ≈ delta + S(n') onde n' é o colapso do prefixo
             let n_prime = match r {
@@ -644,8 +786,11 @@ fn build_predictor(limit: u64) {
                 _ => n,
             };
 
-            let s_prime = if (n_prime as usize) < cache.len() { cache[n_prime as usize] }
-                          else { stopping_time_cached(n_prime, &mut HashMap::new()) };
+            let s_prime = if (n_prime as usize) < cache.len() {
+                cache[n_prime as usize]
+            } else {
+                stopping_time_cached(n_prime, &mut HashMap::new())
+            };
             let pred = delta + s_prime;
             let err = (s_real as i64 - pred as i64).abs();
             errors.push(err);
@@ -654,17 +799,30 @@ fn build_predictor(limit: u64) {
         let sum: u64 = errors.iter().map(|e| *e as u64).sum();
         let mae = sum as f64 / errors.len() as f64;
         let max_err = *errors.iter().max().unwrap() as u64;
-        let s_sum: u64 = ns.iter().map(|n| {
-            let nv = *n;
-            if (nv as usize) < cache.len() { cache[nv as usize] } else { stopping_time_cached(nv, &mut HashMap::new()) }
-        }).sum();
+        let s_sum: u64 = ns
+            .iter()
+            .map(|n| {
+                let nv = *n;
+                if (nv as usize) < cache.len() {
+                    cache[nv as usize]
+                } else {
+                    stopping_time_cached(nv, &mut HashMap::new())
+                }
+            })
+            .sum();
         let s_mean = s_sum as f64 / ns.len() as f64;
 
         total_mae += sum as f64;
         total_count += ns.len() as u64;
 
-        println!("  n≡{:>2} | {:>8.1} | {:>10.2} | {:>8} | {:>5}",
-            r, s_mean, mae, max_err, ns.len());
+        println!(
+            "  n≡{:>2} | {:>8.1} | {:>10.2} | {:>8} | {:>5}",
+            r,
+            s_mean,
+            mae,
+            max_err,
+            ns.len()
+        );
     }
 
     println!();
@@ -677,26 +835,43 @@ fn build_predictor(limit: u64) {
     println!();
 
     for r in 0..32u64 {
-        if r % 4 != 3 && r % 4 != 0 { continue; } // só amostra
+        if r % 4 != 3 && r % 4 != 0 {
+            continue;
+        } // só amostra
         let ns: Vec<u64> = (1..=limit.min(50000)).filter(|n| n % 32 == r).collect();
-        if ns.len() < 5 { continue; }
+        if ns.len() < 5 {
+            continue;
+        }
 
         // Computa manualmente o efeito dos primeiros ~5 passos
         let mut errors = Vec::new();
         for &n in &ns {
-            let s_real = if (n as usize) < cache.len() { cache[n as usize] }
-                         else { stopping_time_cached(n, &mut HashMap::new()) };
+            let s_real = if (n as usize) < cache.len() {
+                cache[n as usize]
+            } else {
+                stopping_time_cached(n, &mut HashMap::new())
+            };
 
             let mut x = n;
             let mut delta = 0u64;
             for _ in 0..5 {
-                if x == 1 { break; }
-                if x % 2 == 0 { x /= 2; delta += 1; }
-                else { x = (3 * x + 1) / 2; delta += 2; }
+                if x == 1 {
+                    break;
+                }
+                if x % 2 == 0 {
+                    x /= 2;
+                    delta += 1;
+                } else {
+                    x = (3 * x + 1) / 2;
+                    delta += 2;
+                }
             }
 
-            let s_prime = if (x as usize) < cache.len() { cache[x as usize] }
-                          else { stopping_time_cached(x, &mut HashMap::new()) };
+            let s_prime = if (x as usize) < cache.len() {
+                cache[x as usize]
+            } else {
+                stopping_time_cached(x, &mut HashMap::new())
+            };
             let pred = delta + s_prime;
             let err = (s_real as i64 - pred as i64).abs();
             errors.push(err);
@@ -705,8 +880,13 @@ fn build_predictor(limit: u64) {
         let sum: u64 = errors.iter().map(|e| *e as u64).sum();
         let mae = sum as f64 / errors.len() as f64;
         let max_err = *errors.iter().max().unwrap() as u64;
-        println!("  n≡{:>2} mod 32: erro_medio={:.2} erro_max={} ({} amostras)",
-            r, mae, max_err, ns.len());
+        println!(
+            "  n≡{:>2} mod 32: erro_medio={:.2} erro_max={} ({} amostras)",
+            r,
+            mae,
+            max_err,
+            ns.len()
+        );
     }
 
     // Conclusão: o resíduo mod 2^k fornece uma previsão EXATA para os primeiros
@@ -749,10 +929,12 @@ fn pattern_depth(n: u64) {
     let pc = popcount(n);
     let tz = trailing_zeros(n);
 
-    println!("  Stopping time: {} passos ({} pares, {} ímpares)",
+    println!(
+        "  Stopping time: {} passos ({} pares, {} ímpares)",
         steps,
         bits.iter().filter(|&&b| b == 0).count(),
-        bits.iter().filter(|&&b| b == 1).count());
+        bits.iter().filter(|&&b| b == 1).count()
+    );
     println!("  Pico: {}", p);
     println!("  Popcount (1-bits): {}", pc);
     println!("  Trailing zeros: {}", tz);
@@ -763,18 +945,20 @@ fn pattern_depth(n: u64) {
     let mut line = String::from("  ");
     for (i, &b) in bits.iter().enumerate() {
         line.push(if b == 1 { '1' } else { '0' });
-        if (i+1) % 60 == 0 {
+        if (i + 1) % 60 == 0 {
             println!("{}", line);
             line = String::from("  ");
         }
     }
-    if !line.trim().is_empty() { println!("{}", line); }
+    if !line.trim().is_empty() {
+        println!("{}", line);
+    }
 
     // Representação binária de n
     println!();
     println!("  n em binário: {:b}", n);
-    println!("  n+1 em binário: {:b}", n+1);
-    println!("  3n+1 em binário: {:b}", 3*n+1);
+    println!("  n+1 em binário: {:b}", n + 1);
+    println!("  3n+1 em binário: {:b}", 3 * n + 1);
 
     // Análise: quantos bits de n determinam a trajetória?
     // A conjectura diz que o stopping time depende de TODOS os bits.
@@ -785,10 +969,15 @@ fn pattern_depth(n: u64) {
     for i in 0..steps.min(20) {
         let bit = x & 1;
         let action = if bit == 0 { "n/2" } else { "3n+1" };
-        println!("    Passo {:>2}: n={:>8} (bin:{:b}) → {} → n'={}",
-            i+1, x, x, action,
-            if bit == 0 { x/2 } else { 3*x+1 });
-        x = if bit == 0 { x/2 } else { 3*x+1 };
+        println!(
+            "    Passo {:>2}: n={:>8} (bin:{:b}) → {} → n'={}",
+            i + 1,
+            x,
+            x,
+            action,
+            if bit == 0 { x / 2 } else { 3 * x + 1 }
+        );
+        x = if bit == 0 { x / 2 } else { 3 * x + 1 };
     }
     if steps > 20 {
         println!("    ... (mais {} passos omitidos)", steps - 20);
@@ -800,7 +989,7 @@ fn pattern_depth(n: u64) {
     x = n;
     for k in 1..=4 {
         print!("    n mod 2^{} = {}", k, x % (1u64 << k));
-        x = if x % 2 == 0 { x/2 } else { 3*x+1 };
+        x = if x % 2 == 0 { x / 2 } else { 3 * x + 1 };
         println!(" → {}", x % (1u64 << k));
     }
 
@@ -812,7 +1001,7 @@ fn pattern_depth(n: u64) {
     println!("    n:             {:>20b}", n);
     println!("    n<<1:          {:>20b}", n << 1);
     println!("    n<<1 + n = 4n: {:>20b}", (n << 1) + n);
-    println!("    +1 = 3n+1:     {:>20b}", 3*n + 1);
+    println!("    +1 = 3n+1:     {:>20b}", 3 * n + 1);
     println!();
     println!("  Isto é: 3n+1 = 4n + 1 - n");
     println!("  Se n = 2^k - 1 (Mersenne), então 3n+1 = 3·2^k - 2 = 2·(3·2^(k-1) - 1)");
@@ -828,7 +1017,10 @@ fn pattern_depth(n: u64) {
         residue.push(if *b == 1 { '1' } else { '0' });
     }
     println!("    parity_code(n) = {} ({} bits)", residue, steps);
-    println!("    Como inteiro decimal: overflowaria u64 ({}+ bits)", steps);
+    println!(
+        "    Como inteiro decimal: overflowaria u64 ({}+ bits)",
+        steps
+    );
 }
 
 // ─── Cellular automaton model of Collatz ─────────────────
@@ -862,7 +1054,7 @@ fn cellular_analysis(n: u64) {
             let mut result_bits = Vec::new();
             let mut carry = 1u8; // the +1
             for i in 0..l {
-                let a = bits[l - 1 - i];  // bit from n at position i from LSB
+                let a = bits[l - 1 - i]; // bit from n at position i from LSB
                 let b = if i + 1 < l { bits[l - 2 - i] } else { 0 }; // bit from n<<1
                 let s = a + b + carry;
                 result_bits.push(s & 1);
@@ -886,19 +1078,29 @@ fn cellular_analysis(n: u64) {
             }
             carries.reverse();
 
-            let carries_str: String = carries.iter().map(|c| if *c == 0 { '0' } else { '1' }).collect();
+            let carries_str: String = carries
+                .iter()
+                .map(|c| if *c == 0 { '0' } else { '1' })
+                .collect();
             let result_str: String = if step == 0 {
                 format!("{:b}", 3 * n + 1)
             } else {
-                result_bits.iter().map(|b| if *b == 1 { '1' } else { '0' }).collect::<String>()
+                result_bits
+                    .iter()
+                    .map(|b| if *b == 1 { '1' } else { '0' })
+                    .collect::<String>()
             };
 
-            println!("{:>3}: n={:>6} (ímpar) bits={:>12}  carry={:>12}  n'={:>14} (3n+1)",
-                step, x, bin, carries_str, result_str);
+            println!(
+                "{:>3}: n={:>6} (ímpar) bits={:>12}  carry={:>12}  n'={:>14} (3n+1)",
+                step, x, bin, carries_str, result_str
+            );
         } else {
             let result = format!("{:b}", x / 2);
-            println!("{:>3}: n={:>6} (par)   bits={:>12}  >>1    n'={:>14} (n/2)",
-                step, x, bin, result);
+            println!(
+                "{:>3}: n={:>6} (par)   bits={:>12}  >>1    n'={:>14} (n/2)",
+                step, x, bin, result
+            );
         }
 
         x = if is_odd == 1 { 3 * x + 1 } else { x / 2 };
@@ -918,8 +1120,8 @@ fn cellular_analysis(n: u64) {
 // ─── Carry chain analysis ────────────────────────────────
 // Para cada n ímpar, v = trailing_zeros(3n+1) determina
 // quantas divisões por 2 vêm depois do passo ímpar.
-// v é a "profundidade do carry": o carry se propaga até 
-// encontrar um bit 0. v é o número de 1s consecutivos 
+// v é a "profundidade do carry": o carry se propaga até
+// encontrar um bit 0. v é o número de 1s consecutivos
 // no final da representação de n (contando com o +1).
 
 fn carry_analysis(limit: u64) {
@@ -936,17 +1138,25 @@ fn carry_analysis(limit: u64) {
     for n in (1..=limit).filter(|n| n % 2 == 1) {
         let v = (3 * n + 1).trailing_zeros();
         *hist.entry(v).or_insert(0) += 1;
-        if v > max_v { max_v = v; }
+        if v > max_v {
+            max_v = v;
+        }
     }
 
-    println!("Distribuição de v = trailing_zeros(3n+1) para n ímpar até {}:", limit);
+    println!(
+        "Distribuição de v = trailing_zeros(3n+1) para n ímpar até {}:",
+        limit
+    );
     println!("  v  | frequência | P(v) | n exemplar");
     println!("{}", "─".repeat(65));
 
     for v in 1..=max_v {
         if let Some(&count) = hist.get(&v) {
             // Find an example
-            let example = (1..=limit).filter(|n| n % 2 == 1 && (3*n + 1).trailing_zeros() == v).next().unwrap_or(0);
+            let example = (1..=limit)
+                .filter(|n| n % 2 == 1 && (3 * n + 1).trailing_zeros() == v)
+                .next()
+                .unwrap_or(0);
             let pct = count as f64 / (limit as f64 / 2.0) * 100.0;
             println!("  {:>2} | {:>10} | {:>5.1}% | n={}", v, count, pct, example);
         }
@@ -966,7 +1176,10 @@ fn carry_analysis(limit: u64) {
     let test_n: u64 = 27;
     let v_formula = 1 + (test_n + 1).trailing_zeros();
     let v_real = (3 * test_n + 1).trailing_zeros();
-    println!("  n={}: v_real={}, v_formula=1+tz(n+1)={} ✓", test_n, v_real, v_formula);
+    println!(
+        "  n={}: v_real={}, v_formula=1+tz(n+1)={} ✓",
+        test_n, v_real, v_formula
+    );
 
     // This formula means: the value of v is determined by the lowest 0-bit in n
     println!();
@@ -1003,7 +1216,7 @@ fn auto_cycle_search(max_k: usize) {
     // Strategy: solve cycle equation using interval arithmetic + bit consistency
     // A cycle of length k satisfies: n = (3^k·n + C) / 2^V
     // where C depends on the v-sequence.
-    // 
+    //
     // Key constraint from the cellular automaton:
     //   v_i = 1  ↔ n_{i-1} ≡ 3 mod 4  (bits end in ...11)
     //   v_i = 2  ↔ n_{i-1} ≡ 1 mod 8  (bits end in ...001, i.e., n≡1 mod 8)
@@ -1120,13 +1333,20 @@ fn cycle_from_v_seq(k: usize, v_seq: &[u32], n_targets: &mut Vec<u128>, found: &
     let mut prefix_v: u32 = 0;
     for j in 0..k {
         let pow2_term = 2u128.checked_pow(prefix_v).unwrap_or(0);
-        if pow2_term == 0 { return; }
+        if pow2_term == 0 {
+            return;
+        }
         let pow3_term = 3u128.pow((k - 1 - j) as u32);
         match pow3_term.checked_mul(pow2_term) {
-            Some(term) => match C.checked_add(term) { Some(c) => C = c, None => return }
+            Some(term) => match C.checked_add(term) {
+                Some(c) => C = c,
+                None => return,
+            },
             None => return,
         }
-        if j < k - 1 { prefix_v += v_seq[j]; }
+        if j < k - 1 {
+            prefix_v += v_seq[j];
+        }
     }
 
     let V = v_seq.iter().sum::<u32>();
@@ -1135,20 +1355,31 @@ fn cycle_from_v_seq(k: usize, v_seq: &[u32], n_targets: &mut Vec<u128>, found: &
         Some(p) => p,
         None => return,
     };
-    if pow2_V <= pow3_k { return; }
+    if pow2_V <= pow3_k {
+        return;
+    }
 
     let denom = pow2_V - pow3_k;
-    if C % denom != 0 { return; }
+    if C % denom != 0 {
+        return;
+    }
     let n0 = C / denom;
-    if n0 == 0 || n0 % 2 == 0 { return; }
-    if n0 == 1 { return; }
+    if n0 == 0 || n0 % 2 == 0 {
+        return;
+    }
+    if n0 == 1 {
+        return;
+    }
 
     // Check bit consistency via direct simulation
     {
         let mut x = n0;
         let mut ok = true;
         for step in 0..k.min(200) {
-            if x % 2 == 0 { ok = false; break; }
+            if x % 2 == 0 {
+                ok = false;
+                break;
+            }
             x = (3 * x + 1) >> v_seq[step];
         }
         if ok && x == 1 {
@@ -1158,8 +1389,6 @@ fn cycle_from_v_seq(k: usize, v_seq: &[u32], n_targets: &mut Vec<u128>, found: &
         }
     }
 }
-
-
 
 // ─── Inverse Collatz Tree ─────────────────────────────────
 //
@@ -1191,9 +1420,22 @@ fn collatz_inverse_tree(max_k: usize, limit: u64) {
 
     for k in 1..=max_k {
         let before = total_n;
-        enumerate_tree(k, 0, &mut v_seq_buf, 0, 0, &mut covered, limit, &mut total_n, &mut max_n_found);
+        enumerate_tree(
+            k,
+            0,
+            &mut v_seq_buf,
+            0,
+            0,
+            &mut covered,
+            limit,
+            &mut total_n,
+            &mut max_n_found,
+        );
         let found_this_k = total_n - before;
-        println!("  k={}: {} novos números (total={}, max_n={})", k, found_this_k, total_n, max_n_found);
+        println!(
+            "  k={}: {} novos números (total={}, max_n={})",
+            k, found_this_k, total_n, max_n_found
+        );
     }
 
     // Check coverage: find all odd n up to limit NOT in the tree
@@ -1203,14 +1445,22 @@ fn collatz_inverse_tree(max_k: usize, limit: u64) {
         let idx = (n as usize) / 64;
         let bit = (n as usize % 64) as u32;
         if idx < covered.len() && (covered[idx] >> bit) & 1 == 0 {
-            if first_gap == 0 { first_gap = n; }
-            if gaps.len() < 20 { gaps.push(n); }
+            if first_gap == 0 {
+                first_gap = n;
+            }
+            if gaps.len() < 20 {
+                gaps.push(n);
+            }
         }
     }
 
     println!();
-    println!("Cobertura: {} ímpares cobertos de {} ({}%)",
-        total_n, (limit + 1) / 2, total_n * 100 / ((limit + 1) / 2));
+    println!(
+        "Cobertura: {} ímpares cobertos de {} ({}%)",
+        total_n,
+        (limit + 1) / 2,
+        total_n * 100 / ((limit + 1) / 2)
+    );
     println!("Primeiro gap: n={}", first_gap);
     if !gaps.is_empty() {
         println!("Primeiros gaps: {:?}", &gaps[..gaps.len().min(20)]);
@@ -1224,17 +1474,28 @@ fn collatz_inverse_tree(max_k: usize, limit: u64) {
         println!();
         println!("⚠️  Gap encontrado em n={}", first_gap);
         println!("   Isto pode significar:");
-        println!("   - A conjectura é falsa e {} é um contraexemplo", first_gap);
-        println!("   - Ou a v-sequence de {} tem k > {} ou v > max_v", first_gap, max_k);
+        println!(
+            "   - A conjectura é falsa e {} é um contraexemplo",
+            first_gap
+        );
+        println!(
+            "   - Ou a v-sequence de {} tem k > {} ou v > max_v",
+            first_gap, max_k
+        );
     }
 }
 
 #[allow(non_snake_case)]
 fn enumerate_tree(
-    k: usize, pos: usize, v_seq: &mut [u32],
-    current_c: u128, current_v: u32,
-    covered: &mut Vec<u64>, limit: u64,
-    total_n: &mut u64, max_n_found: &mut u64,
+    k: usize,
+    pos: usize,
+    v_seq: &mut [u32],
+    current_c: u128,
+    current_v: u32,
+    covered: &mut Vec<u64>,
+    limit: u64,
+    total_n: &mut u64,
+    max_n_found: &mut u64,
 ) {
     let is_last = pos == k - 1;
     let _remaining = k - pos - 1;
@@ -1273,16 +1534,26 @@ fn enumerate_tree(
                 Some(p) => p,
                 None => continue,
             };
-            if pow2_V <= new_c { continue; }
+            if pow2_V <= new_c {
+                continue;
+            }
 
             let pow3_k = 3u128.pow(k as u32);
             let num = pow2_V - new_c;
-            if num % pow3_k != 0 { continue; }
+            if num % pow3_k != 0 {
+                continue;
+            }
 
             let n0 = num / pow3_k;
-            if n0 > limit as u128 { continue; }
-            if n0 % 2 == 0 { continue; }
-            if n0 == 0 { continue; }
+            if n0 > limit as u128 {
+                continue;
+            }
+            if n0 % 2 == 0 {
+                continue;
+            }
+            if n0 == 0 {
+                continue;
+            }
 
             // Verify bit consistency
             if !verify_n0_consistency(n0, k, &v_seq[..pos], v) {
@@ -1296,13 +1567,24 @@ fn enumerate_tree(
                 if (covered[idx] >> bit) & 1 == 0 {
                     covered[idx] |= 1 << bit;
                     *total_n += 1;
-                    if n > *max_n_found { *max_n_found = n; }
+                    if n > *max_n_found {
+                        *max_n_found = n;
+                    }
                 }
             }
         } else {
             v_seq[pos] = v;
-            enumerate_tree(k, pos + 1, v_seq, new_c, new_v,
-                covered, limit, total_n, max_n_found);
+            enumerate_tree(
+                k,
+                pos + 1,
+                v_seq,
+                new_c,
+                new_v,
+                covered,
+                limit,
+                total_n,
+                max_n_found,
+            );
         }
     }
 }
@@ -1311,15 +1593,23 @@ fn verify_n0_consistency(n0: u128, _k: usize, v_prefix: &[u32], last_v: u32) -> 
     let mut x = n0;
     // Check prefix
     for &v in v_prefix {
-        if x % 2 == 0 { return false; }
+        if x % 2 == 0 {
+            return false;
+        }
         let v_found = predict_tz_u128(x);
-        if v_found != v { return false; }
+        if v_found != v {
+            return false;
+        }
         x = (3u128.checked_mul(x).unwrap_or(0) + 1) >> v;
     }
     // Check last step
-    if x % 2 == 0 { return false; }
+    if x % 2 == 0 {
+        return false;
+    }
     let v_found = predict_tz_u128(x);
-    if v_found != last_v { return false; }
+    if v_found != last_v {
+        return false;
+    }
     // The last step should give 1
     x = (3u128.checked_mul(x).unwrap_or(0) + 1) >> last_v;
     x == 1
@@ -1329,7 +1619,9 @@ fn predict_tz_u128(n: u128) -> u32 {
     let mut prev = n & 1;
     for i in 1..128 {
         let curr = (n >> i) & 1;
-        if curr == prev { return i as u32; }
+        if curr == prev {
+            return i as u32;
+        }
         prev = curr;
     }
     128
@@ -1359,9 +1651,18 @@ fn decompose_branch(n: u64) -> (u32, u32, u64) {
 fn fmt_branch(n: u64) -> String {
     let (y, x, r) = decompose_branch(n);
     if y > 0 {
-        format!("{} = 2^{}·(2^{}·{} − 1)  [y={}, x={}, R={}]", n, y, x, 2*r+1, y, x, r)
+        format!(
+            "{} = 2^{}·(2^{}·{} − 1)  [y={}, x={}, R={}]",
+            n,
+            y,
+            x,
+            2 * r + 1,
+            y,
+            x,
+            r
+        )
     } else {
-        format!("{} = 2^{}·{} − 1  [x={}, R={}]", n, x, 2*r+1, x, r)
+        format!("{} = 2^{}·{} − 1  [x={}, R={}]", n, x, 2 * r + 1, x, r)
     }
 }
 
@@ -1389,7 +1690,9 @@ fn branch_layer_test(limit_n: u64, verify_max: u64) {
         let (y, x, _) = decompose_branch(n);
         let b1 = x + y;
 
-        if b1 > max_b1 { max_b1 = b1; }
+        if b1 > max_b1 {
+            max_b1 = b1;
+        }
 
         let next = condensed_collatz(n);
         let (y_next, x_next, _) = decompose_branch(next);
@@ -1397,16 +1700,26 @@ fn branch_layer_test(limit_n: u64, verify_max: u64) {
 
         if b1_next >= b1 && n != 1 {
             violations_b1 += 1;
-            if first_violation_b1 == 0 { first_violation_b1 = n; }
+            if first_violation_b1 == 0 {
+                first_violation_b1 = n;
+            }
         }
     }
 
     println!("📊 Teste b₁ = x + y:");
     println!("  Máximo b₁ observado: {}", max_b1);
-    println!("  Violações (b₁ não decresce): {}/{} ({:.2}%)",
-        violations_b1, limit_n, 100.0 * violations_b1 as f64 / limit_n as f64);
+    println!(
+        "  Violações (b₁ não decresce): {}/{} ({:.2}%)",
+        violations_b1,
+        limit_n,
+        100.0 * violations_b1 as f64 / limit_n as f64
+    );
     if violations_b1 > 0 {
-        println!("  Primeira violação: n = {} ({})", first_violation_b1, fmt_branch(first_violation_b1));
+        println!(
+            "  Primeira violação: n = {} ({})",
+            first_violation_b1,
+            fmt_branch(first_violation_b1)
+        );
     }
     println!();
 
@@ -1438,15 +1751,15 @@ fn branch_layer_test(limit_n: u64, verify_max: u64) {
             }),
             ("b = x + bit_length(R+1)", |n| {
                 let (_y, x, r) = decompose_branch(n);
-                x as u64 + (64 - (r+1).leading_zeros()) as u64
+                x as u64 + (64 - (r + 1).leading_zeros()) as u64
             }),
             ("b = x + y + bit_length(R+1)", |n| {
                 let (y, x, r) = decompose_branch(n);
-                (x + y) as u64 + (64 - (r+1).leading_zeros()) as u64
+                (x + y) as u64 + (64 - (r + 1).leading_zeros()) as u64
             }),
             ("b = x + y + v₂(R+1)", |n| {
                 let (y, x, r) = decompose_branch(n);
-                (x + y) as u64 + (r+1).trailing_zeros() as u64
+                (x + y) as u64 + (r + 1).trailing_zeros() as u64
             }),
         ];
 
@@ -1459,14 +1772,22 @@ fn branch_layer_test(limit_n: u64, verify_max: u64) {
                 let b_next = measure(next);
                 if b_next >= b && n != 1 {
                     violations += 1;
-                    if first == 0 { first = n; }
+                    if first == 0 {
+                        first = n;
+                    }
                 }
             }
             let pct = 100.0 * violations as f64 / verify_max as f64;
             if violations == 0 {
-                println!("  ✅ {} → DECRESCENTE! (0 violações em {})", name, verify_max);
+                println!(
+                    "  ✅ {} → DECRESCENTE! (0 violações em {})",
+                    name, verify_max
+                );
             } else {
-                println!("  ❌ {} → {} violações ({:.2}%), primeira n={}", name, violations, pct, first);
+                println!(
+                    "  ❌ {} → {} violações ({:.2}%), primeira n={}",
+                    name, violations, pct, first
+                );
             }
         }
     }
@@ -1481,14 +1802,27 @@ fn branch_layer_test(limit_n: u64, verify_max: u64) {
         for step in 0..60 {
             let (y, bx, r) = decompose_branch(x);
             let b1 = bx + y;
-            if b1 > max_b1_seen { max_b1_seen = b1; }
-            if b1 > max_ever { max_ever = b1; }
-            if step < 42 || step % 10 == 0 {
-                println!("  passo {:2}: n={:>8}  y={}, x={}, R={:<6}  b₁={}{}",
-                    step, x, y, bx, r, b1,
-                    if b1 > max_b1_seen { " ↑" } else { "" });
+            if b1 > max_b1_seen {
+                max_b1_seen = b1;
             }
-            if x == 1 { break; }
+            if b1 > max_ever {
+                max_ever = b1;
+            }
+            if step < 42 || step % 10 == 0 {
+                println!(
+                    "  passo {:2}: n={:>8}  y={}, x={}, R={:<6}  b₁={}{}",
+                    step,
+                    x,
+                    y,
+                    bx,
+                    r,
+                    b1,
+                    if b1 > max_b1_seen { " ↑" } else { "" }
+                );
+            }
+            if x == 1 {
+                break;
+            }
             x = condensed_collatz(x);
         }
     }
@@ -1507,15 +1841,25 @@ fn branch_layer_test(limit_n: u64, verify_max: u64) {
         if peak_next >= peak_n {
             violations_peak += 1;
             if violations_peak <= 5 {
-                println!("  ❌ n={}: peak={}, C(n)={}, peak(C(n))={}", n, peak_n, next, peak_next);
+                println!(
+                    "  ❌ n={}: peak={}, C(n)={}, peak(C(n))={}",
+                    n, peak_n, next, peak_next
+                );
             }
         }
     }
     if violations_peak == 0 {
-        println!("  ✅ 0 violações em {} — peak b₁ SEMPRE decresce!", total_checked);
+        println!(
+            "  ✅ 0 violações em {} — peak b₁ SEMPRE decresce!",
+            total_checked
+        );
     } else {
-        println!("  ❌ {} violações em {} ({:.2}%)", violations_peak, total_checked,
-            100.0 * violations_peak as f64 / total_checked as f64);
+        println!(
+            "  ❌ {} violações em {} ({:.2}%)",
+            violations_peak,
+            total_checked,
+            100.0 * violations_peak as f64 / total_checked as f64
+        );
     }
 
     // Análise de "ondas": sequência de x=1 → x' > 1 → x-1 → ... → 1 → ...
@@ -1538,16 +1882,23 @@ fn branch_layer_test(limit_n: u64, verify_max: u64) {
             } else if bx > 1 {
                 in_x1 = false;
             }
-            if x == 1 { break; }
+            if x == 1 {
+                break;
+            }
             x = condensed_collatz(x);
         }
     }
 }
 
 fn condensed_collatz(n: u64) -> u64 {
-    if n == 1 { return 1; }
-    if n % 2 == 0 { n / 2 }
-    else { (3 * n + 1) >> (3 * n + 1).trailing_zeros() }
+    if n == 1 {
+        return 1;
+    }
+    if n % 2 == 0 {
+        n / 2
+    } else {
+        (3 * n + 1) >> (3 * n + 1).trailing_zeros()
+    }
 }
 
 // ─── Preimages of n in the condensed Collatz tree ────────
@@ -1568,10 +1919,16 @@ fn preimages_condensed(n: u64, max_v: u32) -> Vec<u64> {
             Some(p) => p - 1,
             None => continue,
         };
-        if num % 3 != 0 { continue; }
-        if num / 3 > u64::MAX as u128 { continue; }
+        if num % 3 != 0 {
+            continue;
+        }
+        if num / 3 > u64::MAX as u128 {
+            continue;
+        }
         let m = (num / 3) as u64;
-        if m % 2 == 0 { continue; }
+        if m % 2 == 0 {
+            continue;
+        }
         let check = (3u128 * m as u128 + 1) >> ((3u128 * m as u128 + 1).trailing_zeros());
         if check as u64 == n {
             result.push(m);
@@ -1597,7 +1954,9 @@ fn build_subtree(root: u64, depth: usize, max_v: u32) -> Vec<Vec<u64>> {
                 }
             }
         }
-        if next_level.is_empty() { break; }
+        if next_level.is_empty() {
+            break;
+        }
         next_level.sort();
         levels.push(next_level);
     }
@@ -1620,10 +1979,20 @@ fn self_similarity_analysis(n: u64, depth: usize) {
     let mut all_nodes: Vec<u64> = subtree.iter().flat_map(|lv| lv.iter()).copied().collect();
     all_nodes.sort();
 
-    println!("📊 Subárvore de n={} ({} nós únicos, {} níveis):", n, all_nodes.len(), subtree.len());
+    println!(
+        "📊 Subárvore de n={} ({} nós únicos, {} níveis):",
+        n,
+        all_nodes.len(),
+        subtree.len()
+    );
     for (i, lv) in subtree.iter().enumerate() {
-        println!("  nível {}: {} nós  (ex: {} ... {})", i, lv.len(),
-            lv.first().unwrap_or(&0), lv.last().unwrap_or(&0));
+        println!(
+            "  nível {}: {} nós  (ex: {} ... {})",
+            i,
+            lv.len(),
+            lv.first().unwrap_or(&0),
+            lv.last().unwrap_or(&0)
+        );
     }
 
     // Test transformations on the subtree
@@ -1652,7 +2021,9 @@ fn self_similarity_analysis(n: u64, depth: usize) {
     for &(mult, add, tname) in &transforms {
         // Compute v-sequence of T(n)
         let tn = (n as i128 * mult as i128 + add as i128) as u64;
-        if tn == n { continue; }
+        if tn == n {
+            continue;
+        }
 
         let v_n = compute_v_seq(n, &mut t_n_memo);
         let v_tn = compute_v_seq(tn, &mut t_n_memo);
@@ -1671,7 +2042,11 @@ fn self_similarity_analysis(n: u64, depth: usize) {
 
         // Build subtree of T(n) and compare sizes
         let tn_subtree = build_subtree(tn, depth, 16);
-        let tn_all: Vec<u64> = tn_subtree.iter().flat_map(|lv| lv.iter()).copied().collect();
+        let tn_all: Vec<u64> = tn_subtree
+            .iter()
+            .flat_map(|lv| lv.iter())
+            .copied()
+            .collect();
 
         println!();
         println!("  {}:", tname);
@@ -1684,7 +2059,11 @@ fn self_similarity_analysis(n: u64, depth: usize) {
         if is_suffix {
             println!("    ✅ v-seq é um SUFIXO (v-seq(n) começa com v-seq(T(n)))");
         }
-        println!("    Subárvore T(n): {} nós (vs {} de n)", tn_all.len(), all_nodes.len());
+        println!(
+            "    Subárvore T(n): {} nós (vs {} de n)",
+            tn_all.len(),
+            all_nodes.len()
+        );
 
         // Check: does the transformed subtree of n overlap with subtree of T(n)?
         let mut overlap = 0u64;
@@ -1696,8 +2075,12 @@ fn self_similarity_analysis(n: u64, depth: usize) {
         }
         let pct = 100.0 * overlap as f64 / all_nodes.len() as f64;
         if overlap > 0 {
-            println!("    🔗 Sobreposição T(subárvore(n)) ∩ subárvore(T(n)): {}/{} ({:.1}%)",
-                overlap, all_nodes.len(), pct);
+            println!(
+                "    🔗 Sobreposição T(subárvore(n)) ∩ subárvore(T(n)): {}/{} ({:.1}%)",
+                overlap,
+                all_nodes.len(),
+                pct
+            );
         } else {
             println!("    ❌ Nenhuma sobreposição");
         }
@@ -1721,12 +2104,23 @@ fn self_similarity_analysis(n: u64, depth: usize) {
         let sizes: Vec<usize> = entries.iter().map(|(_, s)| *s).collect();
         let distinct_sizes: std::collections::HashSet<&usize> = sizes.iter().collect();
         if distinct_sizes.len() == 1 {
-            println!("  ✅ (mod3={}, mod8={}, x={}):     {} raízes, TODAS tamanho {}",
-                key.0, key.1, key.2, entries.len(), sizes[0]);
+            println!(
+                "  ✅ (mod3={}, mod8={}, x={}):     {} raízes, TODAS tamanho {}",
+                key.0,
+                key.1,
+                key.2,
+                entries.len(),
+                sizes[0]
+            );
         } else {
-            println!("  ⚠️  (mod3={}, mod8={}, x={}):     {} raízes, tamanhos variados {:?}",
-                key.0, key.1, key.2, entries.len(),
-                sizes.iter().take(10).collect::<Vec<_>>());
+            println!(
+                "  ⚠️  (mod3={}, mod8={}, x={}):     {} raízes, tamanhos variados {:?}",
+                key.0,
+                key.1,
+                key.2,
+                entries.len(),
+                sizes.iter().take(10).collect::<Vec<_>>()
+            );
         }
     }
 
@@ -1741,22 +2135,33 @@ fn self_similarity_analysis(n: u64, depth: usize) {
             let mut mismatches = 0u64;
             for &r in &small_roots {
                 let tn = a as u64 * r + b;
-                if tn == r { continue; }
+                if tn == r {
+                    continue;
+                }
                 let sz_r = subtree_size(r, depth);
                 let sz_tn = subtree_size(tn, depth);
-                if sz_r == sz_tn { matches += 1; }
-                else { mismatches += 1; }
+                if sz_r == sz_tn {
+                    matches += 1;
+                } else {
+                    mismatches += 1;
+                }
             }
             if matches > 0 && mismatches == 0 {
                 println!("  ✅ {} preserva TODAS as {} raízes!", tname, matches);
             } else if matches > small_roots.len() as u64 / 2 {
-                println!("  ⚠️  {}: {}/{} preservadas", tname, matches, small_roots.len());
+                println!(
+                    "  ⚠️  {}: {}/{} preservadas",
+                    tname,
+                    matches,
+                    small_roots.len()
+                );
             }
         }
     }
 
     // Find the PRESERVED subgroup: which roots have same size under T?
-    let a: u64 = 8; let b: u64 = 3;
+    let a: u64 = 8;
+    let b: u64 = 3;
     println!();
     println!("🔎 Quais raízes são preservadas por T(n) = {}n + {}?", a, b);
     for &r in &small_roots {
@@ -1765,8 +2170,10 @@ fn self_similarity_analysis(n: u64, depth: usize) {
         let sz_tn = subtree_size(tn, depth);
         let mod3 = r % 3;
         let match_str = if sz_r == sz_tn { "✅" } else { "❌" };
-        println!("  {} n={:>2} → T(n)={:>3}:  sub={:<5} → sub={:<5} (mod3={})",
-            match_str, r, tn, sz_r, sz_tn, mod3);
+        println!(
+            "  {} n={:>2} → T(n)={:>3}:  sub={:<5} → sub={:<5} (mod3={})",
+            match_str, r, tn, sz_r, sz_tn, mod3
+        );
     }
 
     // Branching factor analysis at each depth
@@ -1774,18 +2181,29 @@ fn self_similarity_analysis(n: u64, depth: usize) {
     println!("🌳 Fator de ramificação médio por nível (raiz=5):");
     let tree = build_subtree(5, depth.min(8), 12);
     for (i, lv) in tree.iter().enumerate() {
-        if i == 0 { continue; }
-        let prev = tree[i-1].len();
+        if i == 0 {
+            continue;
+        }
+        let prev = tree[i - 1].len();
         let factor = lv.len() as f64 / prev as f64;
         let dead_ends = lv.iter().filter(|&&n| n % 3 == 0).count();
-        println!("  nível {}: {} nós (ramificação médio {:.2}, {} nós ≡0 mod3)",
-            i, lv.len(), factor, dead_ends);
+        println!(
+            "  nível {}: {} nós (ramificação médio {:.2}, {} nós ≡0 mod3)",
+            i,
+            lv.len(),
+            factor,
+            dead_ends
+        );
     }
 }
 
 fn compute_v_seq(n: u64, memo: &mut HashMap<u64, Vec<u32>>) -> Vec<u32> {
-    if let Some(v) = memo.get(&n) { return v.clone(); }
-    if n == 1 { return vec![]; }
+    if let Some(v) = memo.get(&n) {
+        return v.clone();
+    }
+    if n == 1 {
+        return vec![];
+    }
     let mut seq = Vec::new();
     let mut x = n;
     while x > 1 {
@@ -1802,8 +2220,12 @@ fn compute_v_seq(n: u64, memo: &mut HashMap<u64, Vec<u32>>) -> Vec<u32> {
 }
 
 fn compute_peak_b1(n: u64, memo: &mut HashMap<u64, u32>) -> u32 {
-    if let Some(&p) = memo.get(&n) { return p; }
-    if n == 1 { return 1; }
+    if let Some(&p) = memo.get(&n) {
+        return p;
+    }
+    if n == 1 {
+        return 1;
+    }
     let (y, bx, _) = decompose_branch(n);
     let b_here = bx + y;
     let next = condensed_collatz(n);
@@ -1823,7 +2245,10 @@ fn compute_peak_b1(n: u64, memo: &mut HashMap<u64, u32>) -> u32 {
 
 #[allow(non_snake_case)]
 fn find_n0_via_inverse(target: u64, max_k: usize) {
-    println!("Buscando n₀ = {} na árvore inversa de Collatz (k ≤ {})", target, max_k);
+    println!(
+        "Buscando n₀ = {} na árvore inversa de Collatz (k ≤ {})",
+        target, max_k
+    );
     println!("Usando: n₀ = (2^V - C) / 3^k");
     println!("{}", "─".repeat(70));
 
@@ -1852,26 +2277,45 @@ fn find_n0_via_inverse(target: u64, max_k: usize) {
         let mut ok = true;
         for j in 0..suffix_len {
             let pow2_term = 2u128.checked_pow(prefix_v).unwrap_or(0);
-            if pow2_term == 0 { ok = false; break; }
+            if pow2_term == 0 {
+                ok = false;
+                break;
+            }
             let pow3_term = 3u128.pow((suffix_len - 1 - j) as u32);
             let term = match pow3_term.checked_mul(pow2_term) {
                 Some(t) => t,
-                None => { ok = false; break; }
+                None => {
+                    ok = false;
+                    break;
+                }
             };
             C = match C.checked_add(term) {
                 Some(c) => c,
-                None => { ok = false; break; }
+                None => {
+                    ok = false;
+                    break;
+                }
             };
-            if j < suffix_len - 1 { prefix_v += v_sub[j]; }
+            if j < suffix_len - 1 {
+                prefix_v += v_sub[j];
+            }
         }
-        if !ok { continue; }
+        if !ok {
+            continue;
+        }
         let pow2_V = 2u128.checked_pow(V).unwrap_or(0);
-        if pow2_V == 0 || pow2_V <= C { continue; }
+        if pow2_V == 0 || pow2_V <= C {
+            continue;
+        }
         let pow3_suffix = 3u128.pow(suffix_len as u32);
         let num = pow2_V - C;
-        if num % pow3_suffix != 0 { continue; }
+        if num % pow3_suffix != 0 {
+            continue;
+        }
         let computed_n0 = num / pow3_suffix;
-        if computed_n0 % 2 == 0 { continue; }
+        if computed_n0 % 2 == 0 {
+            continue;
+        }
         let mut x = computed_n0;
         for &v in v_sub {
             x = (3u128.checked_mul(x).unwrap_or(0) + 1) >> v;
@@ -1879,7 +2323,10 @@ fn find_n0_via_inverse(target: u64, max_k: usize) {
         if x == 1 {
             verified += 1;
             if suffix_len <= 6 || suffix_len == n_v {
-                println!("  suffix k={:2}: n={:>8} → 1  V={:3}  ✓", suffix_len, computed_n0, V);
+                println!(
+                    "  suffix k={:2}: n={:>8} → 1  V={:3}  ✓",
+                    suffix_len, computed_n0, V
+                );
             }
         }
     }
@@ -1893,9 +2340,16 @@ fn find_n0_via_inverse(target: u64, max_k: usize) {
         let pow2_term = 2u128.checked_pow(prefix_v).unwrap_or(0);
         let pow3_term = 3u128.pow((n_v - 1 - j) as u32);
         if let Some(term) = pow3_term.checked_mul(pow2_term) {
-            full_C = match full_C.checked_add(term) { Some(c) => c, None => break };
-        } else { break; }
-        if j < n_v - 1 { prefix_v += v_full[j]; }
+            full_C = match full_C.checked_add(term) {
+                Some(c) => c,
+                None => break,
+            };
+        } else {
+            break;
+        }
+        if j < n_v - 1 {
+            prefix_v += v_full[j];
+        }
     }
     let pow2_full = 2u128.checked_pow(full_V).unwrap_or(0);
     if pow2_full > full_C {
@@ -1905,9 +2359,15 @@ fn find_n0_via_inverse(target: u64, max_k: usize) {
             let full_n0 = num / pow3_full;
             println!();
             if full_n0 == n0 {
-                println!("✅ CONFIRMADO! n₀ = {} reconstruído pela fórmula inversa (k={}, V={})", n0, n_v, full_V);
+                println!(
+                    "✅ CONFIRMADO! n₀ = {} reconstruído pela fórmula inversa (k={}, V={})",
+                    n0, n_v, full_V
+                );
             } else {
-                println!("⚠️  n₀ da fórmula = {}, difere do alvo {} (overflow?)", full_n0, n0);
+                println!(
+                    "⚠️  n₀ da fórmula = {}, difere do alvo {} (overflow?)",
+                    full_n0, n0
+                );
             }
         }
     }
@@ -1965,32 +2425,55 @@ fn probe_cellular_collatz(start: u64) {
             let predicted_v = predict_trailing_zeros(x);
             // Compute 3n+1 arithmetically to verify
             let v_actual = (3 * x + 1).trailing_zeros();
-            let v_match = if predicted_v == v_actual { "✓" } else { "✗" };
+            let v_match = if predicted_v == v_actual {
+                "✓"
+            } else {
+                "✗"
+            };
 
             if step < 16 {
-                println!("{:>3}: n={:>8} bits={:>12b} | v_pred={} v_real={} {} | → /2^{} = {}",
-                    step, x, x, predicted_v, v_actual, v_match,
-                    v_actual, (3*x+1) >> v_actual);
+                println!(
+                    "{:>3}: n={:>8} bits={:>12b} | v_pred={} v_real={} {} | → /2^{} = {}",
+                    step,
+                    x,
+                    x,
+                    predicted_v,
+                    v_actual,
+                    v_match,
+                    v_actual,
+                    (3 * x + 1) >> v_actual
+                );
             }
             x = (3 * x + 1) >> v_actual;
         } else {
             even_steps += 1;
             if step < 16 {
                 let tz = x.trailing_zeros();
-                println!("{:>3}: n={:>8} bits={:>12b} | tz={} | >> {} = {}",
-                    step, x, x, tz, tz, x >> tz);
+                println!(
+                    "{:>3}: n={:>8} bits={:>12b} | tz={} | >> {} = {}",
+                    step,
+                    x,
+                    x,
+                    tz,
+                    tz,
+                    x >> tz
+                );
             }
             x >>= x.trailing_zeros(); // collapse all /2 at once
         }
 
-        if x > peak { peak = x; }
+        if x > peak {
+            peak = x;
+        }
         step += 1;
     }
 
     println!();
     if x == 1 {
-        println!("✅ Convergiu para 1 em {} passos condensados ({} ímpares, {} pares, pico={})",
-            step, odd_steps, even_steps, peak);
+        println!(
+            "✅ Convergiu para 1 em {} passos condensados ({} ímpares, {} pares, pico={})",
+            step, odd_steps, even_steps, peak
+        );
     } else {
         println!("⏳ Não convergiu em 200 passos (x={}, peak={})", x, peak);
     }
@@ -2029,9 +2512,15 @@ fn probe_cellular_collatz(start: u64) {
     }
     if total_odds > 0 {
         let avg_log_growth = log_growth / total_odds as f64;
-        println!("  log₂(growth) médio por passo ímpar: {:.4}", avg_log_growth);
-        println!("  Fator de crescimento médio: 2^{:.4} = {:.4}",
-            avg_log_growth, 2.0f64.powf(avg_log_growth));
+        println!(
+            "  log₂(growth) médio por passo ímpar: {:.4}",
+            avg_log_growth
+        );
+        println!(
+            "  Fator de crescimento médio: 2^{:.4} = {:.4}",
+            avg_log_growth,
+            2.0f64.powf(avg_log_growth)
+        );
         if avg_log_growth < 0.0 {
             println!("  → Tendência DECRESCENTE (converge para 1) ✓");
         } else {
@@ -2078,20 +2567,33 @@ fn export_signal_csv(limit: u64) {
     let mut out = String::from(lines[0]);
     out.push_str("\n");
     for i in 1..lines.len() - 1 {
-        if let Some(prev_s) = lines[i].split(',').nth(1).and_then(|s| s.parse::<u64>().ok()) {
-            if let Some(cur_s) = lines[i+1].split(',').nth(1).and_then(|s| s.parse::<u64>().ok()) {
+        if let Some(prev_s) = lines[i]
+            .split(',')
+            .nth(1)
+            .and_then(|s| s.parse::<u64>().ok())
+        {
+            if let Some(cur_s) = lines[i + 1]
+                .split(',')
+                .nth(1)
+                .and_then(|s| s.parse::<u64>().ok())
+            {
                 let diff = cur_s as i64 - prev_s as i64;
-                let parts: Vec<&str> = lines[i+1].split(',').collect();
+                let parts: Vec<&str> = lines[i + 1].split(',').collect();
                 if parts.len() >= 6 {
-                    out.push_str(&format!("{},{},{},{},{},{}\n",
-                        parts[0], parts[1], diff, parts[3], parts[4], parts[5]));
+                    out.push_str(&format!(
+                        "{},{},{},{},{},{}\n",
+                        parts[0], parts[1], diff, parts[3], parts[4], parts[5]
+                    ));
                 }
             }
         }
     }
 
     print!("{}", out);
-    eprintln!("Signal CSV: {} linhas, colunas: n,stopping_time,delta,popcount,trailing_zeros,residue16", limit);
+    eprintln!(
+        "Signal CSV: {} linhas, colunas: n,stopping_time,delta,popcount,trailing_zeros,residue16",
+        limit
+    );
 }
 
 // ─── ML feature export ──────────────────────────────────
@@ -2104,13 +2606,27 @@ fn ml_features_csv(limit: u64) {
 
     // Features: 8 métricas binárias + 4 classes residuais + stopping_time como target
     wtr.write_record(&[
-        "n","target_steps",
-        "popcount","trailing_zeros","leading_zeros","bit_length",
-        "popcount_ratio","trailing_ones","parity_code_mod64",
-        "mod2","mod4","mod8","mod16","mod32",
-        "mersenne_distance","power_of_two_distance",
-        "odd_steps","even_steps","peak_value",
-    ]).unwrap();
+        "n",
+        "target_steps",
+        "popcount",
+        "trailing_zeros",
+        "leading_zeros",
+        "bit_length",
+        "popcount_ratio",
+        "trailing_ones",
+        "parity_code_mod64",
+        "mod2",
+        "mod4",
+        "mod8",
+        "mod16",
+        "mod32",
+        "mersenne_distance",
+        "power_of_two_distance",
+        "odd_steps",
+        "even_steps",
+        "peak_value",
+    ])
+    .unwrap();
 
     for n in 1..=limit {
         let s = if (n as usize) < cache.len() {
@@ -2129,33 +2645,43 @@ fn ml_features_csv(limit: u64) {
         let mut to = 0u32;
         if n & 1 == 1 {
             let mut x = n;
-            while x & 1 == 1 { to += 1; x >>= 1; }
+            while x & 1 == 1 {
+                to += 1;
+                x >>= 1;
+            }
         }
 
         // parity code: first 6 bits of parity sequence as a number
         let mut x = n;
         let mut pcode = 0u64;
         for i in 0..6 {
-            if x == 1 { break; }
+            if x == 1 {
+                break;
+            }
             let bit = x & 1;
-            if bit == 1 { pcode |= 1 << i; }
+            if bit == 1 {
+                pcode |= 1 << i;
+            }
             pcode |= (x & 1) << i;
             x = if x & 1 == 1 { (3 * x + 1) / 2 } else { x / 2 };
         }
 
         // Distance to nearest Mersenne (2^k - 1)
         let mut mers_dist = u64::MAX;
-        for k in 1..=bl+1 {
+        for k in 1..=bl + 1 {
             let m = (1u64 << k) - 1;
             let d = (n as i64 - m as i64).unsigned_abs();
-            if d < mers_dist { mers_dist = d; }
+            if d < mers_dist {
+                mers_dist = d;
+            }
         }
 
         // Distance to nearest power of 2
         let pow2_dist = {
             let next_pow2 = 1u64 << bl;
             let prev_pow2 = 1u64 << (bl - 1);
-            (n as i64 - next_pow2 as i64).unsigned_abs()
+            (n as i64 - next_pow2 as i64)
+                .unsigned_abs()
                 .min((n as i64 - prev_pow2 as i64).unsigned_abs())
         };
 
@@ -2165,10 +2691,19 @@ fn ml_features_csv(limit: u64) {
         let mut even_st = 0u64;
         let mut peak_v = n;
         for _ in 0..100 {
-            if x2 == 1 { break; }
-            if x2 & 1 == 1 { odd_st += 1; x2 = (3 * x2 + 1) / 2; }
-            else { even_st += 1; x2 /= 2; }
-            if x2 > peak_v { peak_v = x2; }
+            if x2 == 1 {
+                break;
+            }
+            if x2 & 1 == 1 {
+                odd_st += 1;
+                x2 = (3 * x2 + 1) / 2;
+            } else {
+                even_st += 1;
+                x2 /= 2;
+            }
+            if x2 > peak_v {
+                peak_v = x2;
+            }
         }
 
         wtr.write_record(&[
@@ -2191,7 +2726,8 @@ fn ml_features_csv(limit: u64) {
             &odd_st.to_string(),
             &even_st.to_string(),
             &peak_v.to_string(),
-        ]).unwrap();
+        ])
+        .unwrap();
     }
     wtr.flush().unwrap();
     eprintln!("ML feature CSV: {} linhas, 19 colunas", limit);
