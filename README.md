@@ -4,27 +4,18 @@
 [![Crates.io](https://img.shields.io/crates/v/hako.svg)](https://crates.io/crates/hako)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE-MIT)
 
-DSL para programação de baixo nível, transpilada para Rust. Projetada para kernels, drivers, bootloaders e sistemas embarcados.
+DSL otimizada para LLMs. Programação de baixo nível com contexto mínimo.
 
-## Por que Hako?
+## Otimização pra LLM
 
-Rust é poderoso, mas verboso para hardware. Hako simplifica:
+LLMs trabalham com janelas de contexto finitas. Hako minimiza tokens:
 
-```hako
-// Hako
-box serial {
-    COM1 = 0x3F8
-    config => default
-    write_byte(b) => default
-}
-
-box main {
-    config()
-    write_byte(0x41)
-}
-```
-
-Transpila para Rust puro, pronto pra compilar com `rustc` ou `cargo`.
+| Feature | Reduz | Exemplo |
+|---------|-------|---------|
+| **Boxes** | linearidade | `serial.config()` vs 10 linhas de port I/O |
+| **Flows** | código de init | `flow boot { serial vga }` vs sequência procedural |
+| **Auto mode** | implementação | `config => default` vs `port_outb(0x80, 0x3F8+3)` |
+| **Constantes** | repetição | `COM1 = 0x3F8` definido 1x, injetado N vezes |
 
 ## Instalação
 
@@ -35,20 +26,12 @@ cargo install hako
 ## Uso
 
 ```bash
-# Transpilar
-hako input.hako -o output.rs
-
-# Só validar syntax
-hako input.hako --check
-
-# Compilar e rodar
-rustc output.rs -o output
-./output
+hako input.hako -o output.rs    # transpilar
+hako input.hako --check         # só validar
+rustc output.rs -o output       # compilar
 ```
 
-## Exemplos
-
-### Hello World (Serial)
+## Exemplo
 
 ```hako
 box serial {
@@ -60,60 +43,85 @@ box serial {
 box main {
     config()
     write_byte(72)  // H
-    write_byte(101) // e
-    write_byte(108) // l
-    write_byte(108) // l
-    write_byte(111) // o
 }
 ```
 
-### GPIO LED
+Transpila pra Rust puro, sem dependências.
 
+## Boxes
+
+Módulos nomeados. LLM referência por nome, não por código:
+
+```hako
+box vga {
+    BASE = 0xB8000
+    clear => default
+    write(s) => default
+}
+```
+
+## Flows
+
+Sequência de inicialização. Só nomes, sem código:
+
+```hako
+flow boot {
+    serial
+    vga
+    keyboard
+}
+```
+
+## Stdlib
+
+Mapeamentos auto pra hardware:
+
+```
+Serial:    config, write_byte, read_byte
+UART:      uart_init, uart_write, uart_read
+SPI:       spi_init, spi_transfer
+I2C:       i2c_init, i2c_start, i2c_stop
+GPIO:      gpio_output, gpio_input, gpio_write, gpio_read
+VGA:       clear, write, put_char, scroll
+Port I/O:  outb, inb, outw, inw
+Timer:     pit_config
+Keyboard:  init
+```
+
+Ver [SYNTAX.md](SYNTAX.md) para referência completa.
+
+## Exemplos
+
+### GPIO LED
 ```hako
 box led {
     PIN = 21
-
-    init {
-        gpio_output(PIN)
-    }
-
-    on {
-        gpio_write(PIN, 1)
-    }
-
-    off {
-        gpio_write(PIN, 0)
-    }
+    init { gpio_output(PIN) }
+    on { gpio_write(PIN, 1) }
+    off { gpio_write(PIN, 0) }
 }
 ```
 
 ### UART Echo
-
 ```hako
 box uart {
     BASE = 0x3F8
-
-    init {
-        uart_init(BASE)
-    }
-
+    init { uart_init(BASE) }
     echo {
         init()
         loop {
-            let byte = uart_read(BASE)
-            uart_write(BASE, byte)
+            let b = uart_read(BASE)
+            uart_write(BASE, b)
         }
     }
 }
 ```
 
 ### I2C Sensor
-
 ```hako
 box sensor {
     SDA = 2
     SCL = 3
-
     read {
         i2c_init(SDA, SCL)
         i2c_start(SDA, SCL)
@@ -123,100 +131,12 @@ box sensor {
 }
 ```
 
-### SPI Display
-
-```hako
-box display {
-    MOSI = 2
-    SCLK = 3
-    CS = 4
-
-    init {
-        spi_init(MOSI, SCLK, CS)
-    }
-
-    send_cmd(cmd) {
-        spi_transfer_byte(MOSI, SCLK, CS, cmd)
-    }
-}
-```
-
-## Stdlib
-
-Hako inclui uma stdlib completa para hardware:
-
-| Módulo | Funções |
-|--------|---------|
-| **Serial** | `config`, `write_byte`, `read_byte`, `write_str` |
-| **UART** | `init`, `write`, `read`, `write_str` |
-| **SPI** | `init`, `transfer_byte`, `write` |
-| **I2C** | `init`, `start`, `stop`, `write_bit`, `read_bit`, `write_byte` |
-| **GPIO** | `output`, `input`, `write`, `read` |
-| **VGA** | `put_char`, `write_str`, `clear`, `scroll`, `set_cursor` |
-| **Port I/O** | `outb`, `inb`, `outw`, `inw` |
-| **PIT** | `config` |
-| **Keyboard** | `init` |
-
-## Sintaxe
-
-Ver [SYNTAX.md](SYNTAX.md) para referência completa.
-
-```hako
-// Constantes
-box hardware {
-    BASE = 0x3F8
-    FLAG = 0xFF
-}
-
-// Funções auto (mapeia pra stdlib)
-config => default
-
-// Funções com bloco
-minha_funcao {
-    let x = 42
-    gpio_output(x)
-}
-
-// Flows (sequência de boxes)
-flow boot {
-    serial
-    vga
-    keyboard
-}
-```
-
-## Estrutura do Repo
-
-```
-Hako/
-├── src/
-│   ├── lib.rs          API pública
-│   ├── main.rs         CLI
-│   ├── parser.rs       Parser recursivo descendente
-│   ├── codegen.rs      Gerador de código Rust
-│   ├── ast.rs          Tipos da AST
-│   └── stdlib.rs       Stdlib (serial, VGA, SPI, I2C, GPIO)
-├── tests/              81 testes
-├── examples/           5 exemplos
-├── SYNTAX.md           Documentação de sintaxe
-├── LICENSE-MIT
-└── LICENSE             Apache 2.0
-```
-
 ## Desenvolvimento
 
 ```bash
-# Rodar testes
-cargo test
-
-# Clippy
-cargo clippy -- -D warnings
-
-# Formatar
-cargo fmt
-
-# Build release
-cargo build --release
+cargo test      # 81 testes
+cargo clippy    # 0 warnings
+cargo fmt       # formatar
 ```
 
 ## Licença
