@@ -2,6 +2,9 @@
 name = "hako"
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Hako language transpiler - DSL for bare-metal programming"
+repository = "https://github.com/levementesalgado/Hako"
 
 [lib]
 name = "hako"

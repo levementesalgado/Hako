@@ -45,3 +45,9 @@ rustc /tmp/hello.rs -o /tmp/hello
 - [language_idea.md](language_idea.md) — Ideia e conceitos
 - [objects.md](objects.md) — Sistema de objetos
 - [planning.md](planning.md) — Planejamento do projeto
+
+## Licença
+
+Dual-licenciado sob as licenças [MIT](LICENSE-MIT) e [Apache 2.0](LICENSE).
+
+Qualquer pessoa pode usar, modificar e distribuir este código sob qualquer uma das duas licenças.
