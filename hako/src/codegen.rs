@@ -214,17 +214,48 @@ impl Codegen {
     /// Returns (stdlib_function_name, extra_arguments_to_pass)
     fn auto_fn_info(&self, name: &str) -> (String, Vec<String>) {
         match name {
+            // Serial
             "config" | "setup" => ("serial_config".into(), vec!["COM1".into()]),
             "write_byte" => ("serial_write_byte".into(), vec!["COM1".into()]),
             "read_byte" => ("serial_read_byte".into(), vec!["COM1".into()]),
+            "write_str" => ("serial_write_str".into(), vec!["COM1".into()]),
+            "read_str" => ("serial_read_str".into(), vec!["COM1".into()]),
+            // VGA
             "put_char" => ("vga_put_char".into(), vec![]),
-            "write" | "write_str" => ("vga_write_str".into(), vec![]),
+            "write" => ("vga_write_str".into(), vec![]),
             "clear" => ("vga_clear".into(), vec![]),
             "scroll" => ("vga_scroll".into(), vec![]),
             "set_cursor" => ("vga_set_cursor".into(), vec![]),
+            // Port I/O
             "outb" => ("port_outb".into(), vec![]),
             "inb" => ("port_inb".into(), vec![]),
+            "outw" => ("port_outw".into(), vec![]),
+            "inw" => ("port_inw".into(), vec![]),
+            // Keyboard
             "init" => ("keyboard_init".into(), vec![]),
+            // UART
+            "uart_init" => ("uart_init".into(), vec![]),
+            "uart_write" => ("uart_write".into(), vec![]),
+            "uart_read" => ("uart_read".into(), vec![]),
+            "uart_write_str" => ("uart_write_str".into(), vec![]),
+            // SPI
+            "spi_init" => ("spi_init".into(), vec![]),
+            "spi_transfer" | "spi_transfer_byte" => ("spi_transfer_byte".into(), vec![]),
+            "spi_write" => ("spi_write".into(), vec![]),
+            // I2C
+            "i2c_init" => ("i2c_init".into(), vec![]),
+            "i2c_start" => ("i2c_start".into(), vec![]),
+            "i2c_stop" => ("i2c_stop".into(), vec![]),
+            "i2c_write_bit" => ("i2c_write_bit".into(), vec![]),
+            "i2c_read_bit" => ("i2c_read_bit".into(), vec![]),
+            "i2c_write_byte" => ("i2c_write_byte".into(), vec![]),
+            // GPIO
+            "gpio_output" => ("gpio_output".into(), vec![]),
+            "gpio_input" => ("gpio_input".into(), vec![]),
+            "gpio_write" => ("gpio_write".into(), vec![]),
+            "gpio_read" => ("gpio_read".into(), vec![]),
+            // PIT
+            "pit_config" | "timer" => ("pit_config".into(), vec![]),
             _ => (format!("auto_{}", name), vec![]),
         }
     }

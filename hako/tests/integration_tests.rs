@@ -262,3 +262,134 @@ flow default {
     assert!(code.contains("pub fn flow_boot()"));
     assert!(code.contains("pub fn flow_default()"));
 }
+
+// ===== New Integration Tests =====
+
+#[test]
+fn test_transpile_stdlib_uart() {
+    let input = r#"
+box uart {
+    UART_BASE = 0x3F8
+    uart_init => default
+    uart_write(b) => default
+    uart_read => default
+}
+"#;
+    let (code, _, _) = transpile_string(input).unwrap();
+    assert!(code.contains("uart_init"));
+    assert!(code.contains("uart_write"));
+    assert!(code.contains("uart_read"));
+}
+
+#[test]
+fn test_transpile_stdlib_spi() {
+    let input = r#"
+box spi {
+    spi_init => default
+    spi_transfer(b) => default
+}
+"#;
+    let (code, _, _) = transpile_string(input).unwrap();
+    assert!(code.contains("spi_init"));
+    assert!(code.contains("spi_transfer_byte"));
+}
+
+#[test]
+fn test_transpile_stdlib_i2c() {
+    let input = r#"
+box i2c {
+    i2c_init => default
+    i2c_start => default
+    i2c_write_byte(b) => default
+    i2c_stop => default
+}
+"#;
+    let (code, _, _) = transpile_string(input).unwrap();
+    assert!(code.contains("i2c_init"));
+    assert!(code.contains("i2c_start"));
+    assert!(code.contains("i2c_write_byte"));
+    assert!(code.contains("i2c_stop"));
+}
+
+#[test]
+fn test_transpile_stdlib_gpio() {
+    let input = r#"
+box gpio {
+    gpio_output => default
+    gpio_write(v) => default
+    gpio_input => default
+    gpio_read => default
+}
+"#;
+    let (code, _, _) = transpile_string(input).unwrap();
+    assert!(code.contains("gpio_output"));
+    assert!(code.contains("gpio_write"));
+    assert!(code.contains("gpio_input"));
+    assert!(code.contains("gpio_read"));
+}
+
+#[test]
+fn test_transpile_comments_ignored() {
+    let input = r#"
+// Top-level comment
+box test {
+    // Box comment
+    config => default
+}
+"#;
+    let (code, _, _) = transpile_string(input).unwrap();
+    assert!(code.contains("serial_config"));
+}
+
+#[test]
+fn test_transpile_mixed_peripherals() {
+    let input = r#"
+box serial {
+    COM1 = 0x3F8
+    config => default
+}
+
+box uart {
+    uart_init => default
+}
+
+box spi {
+    spi_init => default
+}
+
+box i2c {
+    i2c_init => default
+}
+
+box gpio {
+    gpio_output => default
+}
+
+flow init {
+    serial
+    uart
+    spi
+    i2c
+    gpio
+}
+"#;
+    let (code, _, _) = transpile_string(input).unwrap();
+    assert!(code.contains("serial_config"));
+    assert!(code.contains("uart_init"));
+    assert!(code.contains("spi_init"));
+    assert!(code.contains("i2c_init"));
+    assert!(code.contains("gpio_output"));
+}
+
+#[test]
+fn test_transpile_port_outw() {
+    let input = r#"
+box port_test {
+    outw => default
+    inw => default
+}
+"#;
+    let (code, _, _) = transpile_string(input).unwrap();
+    assert!(code.contains("port_outw"));
+    assert!(code.contains("port_inw"));
+}

@@ -1,0 +1,53 @@
+// I2C sensor driver (e.g. BMP280 temperature/pressure)
+// Compile: hako examples/sensor_i2c.hako -o /tmp/sensor_i2c.rs
+// Run: rustc /tmp/sensor_i2c.rs -o /tmp/sensor_i2c
+
+box sensor_init {
+    i2c_init(2, 3)
+    i2c_start(2, 3)
+    i2c_write_byte(2, 3, 0xEC)
+    i2c_write_byte(2, 3, 0xE0)
+    i2c_stop(2, 3)
+}
+
+box sensor_read_temp {
+    i2c_start(2, 3)
+    i2c_write_byte(2, 3, 0xEC)
+    i2c_write_byte(2, 3, 0xFA)
+    i2c_start(2, 3)
+    i2c_write_byte(2, 3, 0xED)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_stop(2, 3)
+}
+
+box sensor_read_pressure {
+    i2c_start(2, 3)
+    i2c_write_byte(2, 3, 0xEC)
+    i2c_write_byte(2, 3, 0xF7)
+    i2c_start(2, 3)
+    i2c_write_byte(2, 3, 0xED)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_read_bit(2, 3)
+    i2c_stop(2, 3)
+}
+
+box sensor_loop {
+    sensor_init()
+    loop {
+        sensor_read_temp()
+        sensor_read_pressure()
+    }
+}

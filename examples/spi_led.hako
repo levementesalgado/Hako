@@ -1,0 +1,41 @@
+// SPI LED strip driver (WS2812-like)
+// Compile: hako examples/spi_led.hako -o /tmp/spi_led.rs
+// Run: rustc /tmp/spi_led.rs -o /tmp/spi_led
+
+box led_strip_init {
+    spi_init(2, 3, 4)
+}
+
+box led_strip_color {
+    spi_transfer_byte(2, 3, 4, 0xFF)
+    spi_transfer_byte(2, 3, 4, 0x00)
+    spi_transfer_byte(2, 3, 4, 0x00)
+}
+
+box led_strip_green {
+    spi_transfer_byte(2, 3, 4, 0x00)
+    spi_transfer_byte(2, 3, 4, 0xFF)
+    spi_transfer_byte(2, 3, 4, 0x00)
+}
+
+box led_strip_blue {
+    spi_transfer_byte(2, 3, 4, 0x00)
+    spi_transfer_byte(2, 3, 4, 0x00)
+    spi_transfer_byte(2, 3, 4, 0xFF)
+}
+
+box led_strip_off {
+    spi_transfer_byte(2, 3, 4, 0x00)
+    spi_transfer_byte(2, 3, 4, 0x00)
+    spi_transfer_byte(2, 3, 4, 0x00)
+}
+
+box led_strip_rainbow {
+    led_strip_init()
+    loop {
+        led_strip_color()
+        led_strip_green()
+        led_strip_blue()
+        led_strip_off()
+    }
+}

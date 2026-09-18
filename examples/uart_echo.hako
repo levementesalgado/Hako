@@ -1,0 +1,15 @@
+// UART echo server
+// Compile: hako examples/uart_echo.hako -o /tmp/uart_echo.rs
+// Run: rustc /tmp/uart_echo.rs -o /tmp/uart_echo
+
+box uart_init_serial {
+    uart_init(0x3F8)
+}
+
+box uart_echo {
+    uart_init_serial()
+    loop {
+        let byte = uart_read(0x3F8)
+        uart_write(0x3F8, byte)
+    }
+}

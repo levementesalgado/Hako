@@ -1,0 +1,31 @@
+// LED driver using GPIO bit-bang
+// Compile: hako examples/led_driver.hako -o /tmp/led_driver.rs
+// Run: rustc /tmp/led_driver.rs -o /tmp/led_driver
+
+box led_init {
+    gpio_output(21)
+    gpio_output(22)
+    gpio_output(23)
+}
+
+box led_on {
+    gpio_write(21, 1)
+    gpio_write(22, 1)
+    gpio_write(23, 1)
+}
+
+box led_off {
+    gpio_write(21, 0)
+    gpio_write(22, 0)
+    gpio_write(23, 0)
+}
+
+box led_blink {
+    led_init()
+    loop {
+        led_on()
+        // delay
+        led_off()
+        // delay
+    }
+}
