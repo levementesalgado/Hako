@@ -1,60 +1,47 @@
-# Mizu OS + Hako
+# Hako
 
-Kernel i686 bare-metal com o transpilador Hako embutido como linguagem de driver de primeiro nível.
+Linguagem de programação transpilada para Rust, projetada para programação de baixo nível e sistemas embarcados.
 
 ## Estrutura
 
 ```
-mizu-kernel/          → kernel i686 (Rust + assembly)
+hako/                     → transpilador Hako → Rust
   src/
-    main.rs           → entry point (kmain)
-    vga_driver.rs     → driver VGA modo texto (80×25)
-    serial_driver.rs  → driver serial COM1
-    keyboard.rs       → driver PS/2 com buffer circular
-    shell.rs          → shell interativo (12 comandos)
-    interrupts.rs     → GDT, IDT, PIC, PIT
-    memory.rs         → alocador de frames bitmap + heap free-list
-    fs.rs             → initramfs tar parser
-    arch/i686/
-      boot.asm        → multiboot header + stack setup
-      interrupts.asm  → GDT/IDT assembly, stubs de interrupção
-      link.ld         → linker script (GRUB-compliant)
-    src/hako/         → fontes Hako transpilados em build.rs
-hako/                 → transpilador Hako → Rust
-  src/
-    ast.rs            → tipos da AST
-    parser.rs         → parser recursivo descendo
-    codegen.rs        → gerador de código Rust
-    stdlib.rs         → stdlib predefinida (serial, VGA, PIT, teclado, port I/O)
-    lib.rs            → API pública (transpile_file)
-    main.rs           → CLI
+    ast.rs                → tipos da AST
+    parser.rs             → parser recursivo descendente
+    codegen.rs            → gerador de código Rust
+    stdlib.rs             → stdlib predefinida (serial, VGA, PIT, teclado, port I/O)
+    lib.rs                → API pública (transpile_file)
+    main.rs               → CLI
+  examples/               → exemplos de código Hako
+collatz-analyzer/         → analisador de ciclos Collatz (teoria da linguagem)
+DOCUMENTACAO.md           → documentação completa da linguagem
+language_idea.md          → ideia e conceitos da linguagem
+objects.md                → sistema de objetos
 ```
 
 ## Build
 
 ```bash
-# Hako (standalone)
+# Transpilar arquivo Hako para Rust
 cargo run -p hako -- input.hako -o output.rs
 
-# Kernel + Hako
-cd mizu-kernel
-cargo +nightly build -Zjson-target-spec -Zbuild-std-features=compiler-builtins-mem \
-  --target i686-mizu.json --release
-
-# ISO
-cp target/i686-mizu/release/mizu-kernel /tmp/mizu-iso/boot/mizu.bin
-grub-mkrescue -o /tmp/mizu.iso /tmp/mizu-iso
-
-# QEMU
-qemu-system-x86_64 -cdrom /tmp/mizu.iso -m 128M -no-reboot -nographic
+# Compilar o resultado
+rustc output.rs -o output
 ```
 
-## Status
+## Exemplos
 
-- Kernel boota (GRUB → protected mode → kmain)
-- GDT, IDT, PIC, PIT configurados
-- Drivers: VGA texto, serial COM1, PS/2 keyboard (polling)
-- Heap allocator, frame allocator, initramfs
-- Shell com 12 comandos
-- Hako demo roda na inicialização (serial + VGA)
-- Interrupções desabilitadas (sti causa hang — PIT IRQ0 pendente)
+```bash
+# Rodar exemplo
+cargo run -p hako -- examples/hello.hako -o /tmp/hello.rs
+rustc /tmp/hello.rs -o /tmp/hello
+/tmp/hello
+```
+
+## Documentação
+
+- [DOCUMENTACAO.md](DOCUMENTACAO.md) — Documentação completa da linguagem
+- [language_idea.md](language_idea.md) — Ideia e conceitos
+- [objects.md](objects.md) — Sistema de objetos
+- [planning.md](planning.md) — Planejamento do projeto
