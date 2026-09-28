@@ -182,18 +182,18 @@ fn test_transpile_complex_control_flow() {
 box test {
     run {
         for i in 0..10 {
-            if i > 5 => {
+            if i > 5 {
                 x = i
             } else {
                 x = i
             }
-            if x == 10 => {
+            if x == 10 {
                 break
             }
         }
         loop {
             y = y + 1
-            if y > 100 => {
+            if y > 100 {
                 break
             }
         }

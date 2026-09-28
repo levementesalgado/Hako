@@ -572,9 +572,10 @@ impl Parser {
             } else if c == ')' {
                 depth -= 1;
             } else if depth == 0
-                && ((c == '/'
-                    && self.pos + 1 < self.input.len()
-                    && self.input.as_bytes()[self.pos + 1] as char == '/')
+                && (c == '{'
+                    || (c == '/'
+                        && self.pos + 1 < self.input.len()
+                        && self.input.as_bytes()[self.pos + 1] as char == '/')
                     || (c == '='
                         && self.pos + 1 < self.input.len()
                         && self.input.as_bytes()[self.pos + 1] as char == '>'))

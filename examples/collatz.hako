@@ -9,7 +9,7 @@ box collatz {
 
   // --- Sequência de Collatz pura ---
   next(n) {
-    if n % 2 == 0 => { n / 2 }
+    if n % 2 == 0 { n / 2 }
     else { 3 * n + 1 }
   }
 
@@ -18,7 +18,7 @@ box collatz {
     mut steps = 0
     mut x = n
     loop {
-      if x == 1 => { break }
+      if x == 1 { break }
       x = next(x)
       steps = steps + 1
     }
@@ -32,7 +32,7 @@ box collatz {
     loop {
       buf[i] = x
       i = i + 1
-      if x == 1 => { break }
+      if x == 1 { break }
       x = next(x)
     }
   }
@@ -45,7 +45,7 @@ box collatz {
     vga::write_str("----------------\n")
     mut n = 1
     loop {
-      if n > max => { break }
+      if n > max { break }
       s = stopping_time(n)
       // Formata: "NNN -> SSS\n"
       vga::write_str(int_to_str(n))
@@ -62,7 +62,7 @@ box collatz {
     serial::write_str("n,steps,peak,parity_bits\n")
     mut n = 1
     loop {
-      if n > max => { break }
+      if n > max { break }
       s = stopping_time(n)
       p = peak(n)
       bits = parity_pattern(n)
@@ -84,9 +84,9 @@ box collatz {
     mut x = n
     mut max = n
     loop {
-      if x == 1 => { break }
+      if x == 1 { break }
       x = next(x)
-      if x > max => { max = x }
+      if x > max { max = x }
     }
     max
   }
@@ -97,8 +97,8 @@ box collatz {
     mut bits = 0u32
     mut i = 0u32
     loop {
-      if x == 1 => { break }
-      if x % 2 == 0 => { /* bit 0 */ }
+      if x == 1 { break }
+      if x % 2 == 0 { /* bit 0 */ }
       else { bits = bits | (1 << i) }
       x = next(x)
       i = i + 1

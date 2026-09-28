@@ -182,7 +182,7 @@ fn test_parse_if_statement() {
     let input = r#"
 box test {
     check {
-        if x > 0 => {
+        if x > 0 {
             y = 1
         } else {
             y = 0
@@ -505,8 +505,8 @@ fn test_parse_nested_blocks() {
     let input = r#"
 box test {
     run {
-        if x > 0 => {
-            if y > 0 => {
+        if x > 0 {
+            if y > 0 {
                 z = 1
             }
         }
