@@ -2,16 +2,18 @@
 box sensor {
     SDA = 2
     SCL = 3
+    i2c_init(sda, scl) => default
+    i2c_start(sda, scl) => default
+    i2c_stop(sda, scl) => default
+    i2c_write_byte(sda, scl, byte) => default
     init {
         i2c_init(SDA, SCL)
         i2c_start(SDA, SCL)
         i2c_write_byte(SDA, SCL, 0xEC)
         i2c_stop(SDA, SCL)
     }
-    read {
-        i2c_start(SDA, SCL)
-        i2c_write_byte(SDA, SCL, 0xEC)
-        i2c_stop(SDA, SCL)
+    run {
+        init()
     }
 }
 

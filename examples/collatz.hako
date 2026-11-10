@@ -1,19 +1,17 @@
-// collatz.hako — Sequência de Collatz (sintaxe atual)
+// collatz.hako — sequência de Collatz (loop em block mode)
 box collatz {
-    MAX_N = 10000
-    WIDTH = 16
-    next(n) {
-        if n % 2 == 0 { n / 2 } else { 3 * n + 1 }
-    }
-    stopping_time(n) {
-        mut steps = 0
-        mut x = n
+    N = 27
+    COM1 = 0x3F8
+    write_str(s) => default
+    run {
+        let mut n = N
+        let mut steps = 0
         loop {
-            if x == 1 { break }
-            x = next(x)
+            if n == 1 { break }
+            if n % 2 == 0 { n = n / 2 } else { n = 3 * n + 1 }
             steps = steps + 1
         }
-        steps
+        write_str("done")
     }
 }
 

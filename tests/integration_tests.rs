@@ -394,3 +394,24 @@ box port_test {
     assert!(code.contains("port_outw"));
     assert!(code.contains("port_inw"));
 }
+
+#[test]
+fn test_all_examples_transpile() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples");
+    let mut checked = 0;
+    for entry in fs::read_dir(&dir).unwrap() {
+        let path = entry.unwrap().path();
+        if path.extension().and_then(|e| e.to_str()) != Some("hako") {
+            continue;
+        }
+        let out = std::env::temp_dir().join(format!(
+            "hako_example_{}.rs",
+            path.file_stem().unwrap().to_string_lossy()
+        ));
+        transpile_file(&path, &out)
+            .unwrap_or_else(|e| panic!("{}: {}", path.display(), e));
+        let _ = fs::remove_file(&out);
+        checked += 1;
+    }
+    assert!(checked >= 6, "esperava >= 6 exemplos, achei {}", checked);
+}

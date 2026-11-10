@@ -7,7 +7,7 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - Transpilador `hako input.hako -o output.rs` + `--check`
 - Boxes, flows, constantes injetadas, auto mode, block mode, raw mode
 - Stdlib: serial/UART/SPI/I2C/GPIO/VGA, Port I/O (`outb`, `inb`, `outw`, `inw`), timer, keyboard
-- Macros GPIO, 86 testes, CI no GitHub Actions
+- Macros GPIO, 88 testes, CI no GitHub Actions
 - `cargo clippy` 0 warnings, dual license MIT/Apache-2.0
 - `if/else` sem `=>` como forma canônica
 - `inb` com **retorno** (`port_inb` propaga o valor, sem `;` no auto mode)
@@ -18,7 +18,8 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - Teste de `for`/`in` e de erro com linha/coluna nas `parser_tests`
 - `hako --fmt` (roda `rustfmt` na saída gerada)
 - `hako view` (visualização ASCII de boxes/flows, fonte ASCII preservada)
-- Exemplos `examples/*.hako` reescritos na sintaxe atual (todos parseiam via `hako view`)
+- Exemplos `examples/*.hako` reescritos na sintaxe atual; todos transpilam e o Rust gerado compila com a stdlib (`rustc --crate-type lib`)
+- Parser preserva espaço em `let mut x = 0` (não vira `letmutx`)
 - `port_inb -> u8` e `port_inw -> u16` na stdlib (tipagem correta do `in al/ax`)
 - Auto mode gera tipo de retorno (`-> u8`/`u16`/`u32`) pras funções que devolvem valor
 - Stdlib compila em stable: `macro_rules!` no lugar de `pub macro`, `b'\n'` sem escape duplo

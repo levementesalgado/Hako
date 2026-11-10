@@ -1,10 +1,16 @@
 // LED driver usando GPIO bit-bang
-// Compile: hako examples/led_driver.hako -o /tmp/led_driver.rs
+// Auto mode: gpio_output/gpio_write viram wrappers da stdlib.
 box led {
     PIN = 21
+    gpio_output(pin) => default
+    gpio_write(pin, value) => default
     init { gpio_output(PIN) }
     on { gpio_write(PIN, 1) }
     off { gpio_write(PIN, 0) }
+    run {
+        init()
+        on()
+    }
 }
 
 flow default {

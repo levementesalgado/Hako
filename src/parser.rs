@@ -509,7 +509,7 @@ impl Parser {
             self.pos = saved;
             if has_continuation {
                 let rest = self.expr_eol()?;
-                Ok(Stmt::Expr(format!("{}{}", lvalue, rest)))
+                Ok(Stmt::Expr(format!("{} {}", lvalue, rest)))
             } else {
                 Ok(Stmt::Expr(lvalue))
             }

@@ -3,11 +3,19 @@ box led {
     MOSI = 2
     SCLK = 3
     CS = 4
-    init { spi_init(MOSI, SCLK, CS) }
+    spi_init(mosi, sclk, cs) => default
+    spi_transfer_byte(mosi, sclk, cs, byte) => default
+    init {
+        spi_init(MOSI, SCLK, CS)
+    }
     color {
         spi_transfer_byte(MOSI, SCLK, CS, 0xFF)
         spi_transfer_byte(MOSI, SCLK, CS, 0x00)
         spi_transfer_byte(MOSI, SCLK, CS, 0x00)
+    }
+    run {
+        init()
+        color()
     }
 }
 

@@ -1,10 +1,14 @@
-// VGA text mode driver (Hako example)
+// VGA text mode driver
 box vga {
     BASE = 0xB8000
-    init { clear() }
     clear => default
     write(s) => default
+    put_char(c, x, y) => default
     scroll => default
+    run {
+        clear()
+        write("Hako VGA")
+    }
 }
 
 flow default {

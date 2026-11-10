@@ -1,11 +1,14 @@
+// UART/serial echo (COM1)
 box serial {
     COM1 = 0x3F8
-    init { config() }
-    echo {
-        init()
+    config => default
+    read_byte => default
+    write_byte(b) => default
+    run {
+        config()
         loop {
-            b = read_byte(0x3F8)
-            write_byte(b)
+            let b = read_byte()
+            write_byte(b as u32)
         }
     }
 }

@@ -134,7 +134,7 @@ box sensor {
 ## Desenvolvimento
 
 ```bash
-cargo test      # 86 testes
+cargo test      # 88 testes
 cargo clippy    # 0 warnings
 cargo fmt       # formatar
 ```

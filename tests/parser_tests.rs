@@ -574,6 +574,28 @@ box serial {
 }
 
 #[test]
+fn test_parse_let_mut_keeps_space() {
+    // `let mut x = 0` não pode virar `letmutx = 0`
+    let input = r#"
+box test {
+    run {
+        let mut x = 0
+        x = x + 1
+    }
+}
+"#;
+    let mut p = Parser::new(input);
+    let prog = p.parse().unwrap();
+    match &prog.boxes[0].items[0] {
+        Item::Fn { body, .. } => match &body[0] {
+            Stmt::Expr(e) => assert_eq!(e, "let mut x = 0"),
+            other => panic!("expected Expr, got {:?}", other),
+        },
+        _ => panic!("expected Fn"),
+    }
+}
+
+#[test]
 fn test_parse_for_loop_and_span_error() {
     // for-in parseia var/iter/body
     let input = r#"
