@@ -572,3 +572,30 @@ box serial {
     // The Display trait writes " => default" with a trailing newline
     assert!(display.contains("=> default"));
 }
+
+#[test]
+fn test_parse_for_loop_and_span_error() {
+    // for-in parseia var/iter/body
+    let input = r#"
+box test {
+    run {
+        for x in 0..10 {
+            total = total + x
+        }
+    }
+}
+"#;
+    let mut p = Parser::new(input);
+    let prog = p.parse().unwrap();
+    match &prog.boxes[0].items[0] {
+        Item::Fn { body, .. } => {
+            assert!(matches!(body[0], Stmt::For { .. }));
+        }
+        _ => panic!("expected Fn"),
+    }
+
+    // Erro de parsing carrega linha/coluna (span útil)
+    let mut p = Parser::new("box { }");
+    let err = p.parse().unwrap_err();
+    assert!(format!("{}", err).contains("line"));
+}

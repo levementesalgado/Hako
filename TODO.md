@@ -13,6 +13,9 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - `inb` com **retorno** (`port_inb` propaga o valor, sem `;` no auto mode)
 - `outb(value, port)` documentado no `SYNTAX.md` (valor primeiro, porta depois)
 - `flow { box }` → `box::run()` com convenção `flow default → flow_default()` no `SYNTAX.md`
+- `outw`/`inw` e `pit_config`/`timer` com exemplos no `SYNTAX.md`
+- Exemplo de uso da lib (`examples/lib_usage.rs`, `transpile_string`/`transpile_file`)
+- Teste de `for`/`in` e de erro com linha/coluna nas `parser_tests`
 
 ## 🔴 Alta prioridade
 
@@ -25,10 +28,7 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - Macros (Rust ✅, Hako ❌, mas `raw` cobre alguns casos)
 - Ecossistema (crates.io massivo no Rust, nada no Hako ainda — `cargo install hako` é só o transpilador)
 - Ferramentas (`cargo`, `rustfmt` no Rust, nada no Hako ainda — formatar, `cargo test` de saída gerada)
-- Erros de parsing com span útil (hoje só mensagem curta)
 
 ## 🟢 Baixa prioridade
 
 - Editor com visualização de caixas (emoji) mantendo fonte ASCII (`box`/`inst`)
-- Suporte a `in`/`for in` mais completo (hoje mínimo)
-- `loop` com condição e `break` documentados no `SYNTAX.md` atual
