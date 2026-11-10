@@ -16,6 +16,7 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - `outw`/`inw` e `pit_config`/`timer` com exemplos no `SYNTAX.md`
 - Exemplo de uso da lib (`examples/lib_usage.rs`, `transpile_string`/`transpile_file`)
 - Teste de `for`/`in` e de erro com linha/coluna nas `parser_tests`
+- `hako --fmt` (roda `rustfmt` na saída gerada)
 
 ## 🔴 Alta prioridade
 
@@ -27,7 +28,8 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - Traits/genéricos (Rust ✅, Hako ❌)
 - Macros (Rust ✅, Hako ❌, mas `raw` cobre alguns casos)
 - Ecossistema (crates.io massivo no Rust, nada no Hako ainda — `cargo install hako` é só o transpilador)
-- Ferramentas (`cargo`, `rustfmt` no Rust, nada no Hako ainda — formatar, `cargo test` de saída gerada)
+
+## 🟢 Baixa prioridade
 
 ## 🟢 Baixa prioridade
 
