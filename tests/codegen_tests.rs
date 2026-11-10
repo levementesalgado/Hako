@@ -69,6 +69,19 @@ box serial {
 }
 
 #[test]
+fn test_codegen_auto_mode_returns_value() {
+    // inb/read_byte devem propagar o retorno (sem `;`), não descartar.
+    let input = r#"
+box kbd {
+    inb(p) => default
+}
+"#;
+    let output = transpile(input);
+    assert!(output.contains("crate::hako_stdlib::port_inb(p)"));
+    assert!(!output.contains("crate::hako_stdlib::port_inb(p);"));
+}
+
+#[test]
 fn test_codegen_block_function() {
     let input = r#"
 box test {

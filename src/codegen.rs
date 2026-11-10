@@ -107,8 +107,10 @@ impl Codegen {
                     }
                     self.result.push_str(a);
                 }
-                // No args at all — close cleanly
-                self.result.push_str(");\n");
+                // Sem `;` para que funções que retornam valor (inb, read_byte,
+                // inw, gpio_read, uart_read, serial_read_*) propaguem o retorno.
+                // Para funções void, a expressão cauda ainda retorna ().
+                self.result.push_str(")\n");
             }
             FnMode::Block => {
                 for s in body {

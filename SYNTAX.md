@@ -65,16 +65,20 @@ read_byte => default   // serial_read_byte(COM1)
 **Mapeamento completo:**
 
 ```
-Serial:    config, write_byte, read_byte, write_str
-UART:      uart_init, uart_write, uart_read
-SPI:       spi_init, spi_transfer, spi_write
-I2C:       i2c_init, i2c_start, i2c_stop, i2c_write_byte
-GPIO:      gpio_output, gpio_input, gpio_write, gpio_read
+Serial:    config, write_byte, read_byte (-> u32), write_str
+UART:      uart_init, uart_write, uart_read (-> u32)
+SPI:       spi_init, spi_transfer (-> u32), spi_write
+I2C:       i2c_init, i2c_start, i2c_stop, i2c_write_byte (-> u32)
+GPIO:      gpio_output, gpio_input, gpio_write, gpio_read (-> u32)
 VGA:       clear, write, put_char, scroll, set_cursor
-Port I/O:  outb, inb, outw, inw
+Port I/O:  outb(value, port), inb(port) -> u32, outw(value, port), inw(port) -> u32
 Timer:     pit_config, timer
 Keyboard:  init
 ```
+
+Ordem de args no Port I/O: `outb(0x11, 0x20)` = valor 0x11 na porta 0x20 (valor primeiro, porta depois). `inb(port)` devolve o byte lido como `u32`.
+
+Com auto mode, `read_byte(p) => default` vira `return port_inb(p)` implícito (sem `;`), então `b = read_byte(0x60)` pode usar o retorno diretamente.
 
 ## Block Mode
 
