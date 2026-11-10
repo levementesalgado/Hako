@@ -128,6 +128,8 @@ pub fn flow_boot() {
 }
 ```
 
+Convenção: todo box no flow precisa ter uma função `run()`. No Mizu usa-se `flow default { process }` que gera `flow_default()` chamando `process::run()`.
+
 ## Controle de Fluxo
 
 Mínimo de tokens:

@@ -12,11 +12,11 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - `if/else` sem `=>` como forma canônica
 - `inb` com **retorno** (`port_inb` propaga o valor, sem `;` no auto mode)
 - `outb(value, port)` documentado no `SYNTAX.md` (valor primeiro, porta depois)
+- `flow { box }` → `box::run()` com convenção `flow default → flow_default()` no `SYNTAX.md`
 
 ## 🔴 Alta prioridade
 
 - Tipos e inferência: Rust tem `u8`, `&str`, `fn()`; Hako infere por nome (`s→&str`, `buf→&[u32]`, resto `u32` batendo com a stdlib). Tipagem `u8` de verdade exige migrar a stdlib `port_inb` de `u32` para `u8` (breaking)
-- `flow` gerando `run()` — hoje `flow boot { serial vga }` vira `flow_boot()`, mas o Mizu usa `flow default { process }` → `flow_default()`. Documentar a convenção
 
 ## 🟡 Média prioridade
 
