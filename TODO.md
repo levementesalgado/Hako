@@ -7,7 +7,7 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - Transpilador `hako input.hako -o output.rs` + `--check`
 - Boxes, flows, constantes injetadas, auto mode, block mode, raw mode
 - Stdlib: serial/UART/SPI/I2C/GPIO/VGA, Port I/O (`outb`, `inb`, `outw`, `inw`), timer, keyboard
-- Macros GPIO, 81 testes, CI no GitHub Actions
+- Macros GPIO, 84 testes, CI no GitHub Actions
 - `cargo clippy` 0 warnings, dual license MIT/Apache-2.0
 - `if/else` sem `=>` como forma canônica
 - `inb` com **retorno** (`port_inb` propaga o valor, sem `;` no auto mode)
@@ -23,8 +23,4 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - Borrow checker / traits / macros: herdados do Rust gerado (o transpiler só emite Rust seguro; `raw` usa `asm!` com `unsafe` explícito)
 - Ecossistema: crate `hako` publicada (`cargo install hako`), CLI + lib
 
-## 🔴 Alta prioridade
-
-## 🟡 Média prioridade
-
-## 🟢 Baixa prioridade
+Fila vazia — nenhum item pendente.
