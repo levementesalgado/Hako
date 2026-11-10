@@ -26,7 +26,6 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - Ecossistema (crates.io massivo no Rust, nada no Hako ainda — `cargo install hako` é só o transpilador)
 - Ferramentas (`cargo`, `rustfmt` no Rust, nada no Hako ainda — formatar, `cargo test` de saída gerada)
 - Erros de parsing com span útil (hoje só mensagem curta)
-- `outw`/`inw` e `pit_config`/`timer` sem exemplos no `SYNTAX.md`
 
 ## 🟢 Baixa prioridade
 

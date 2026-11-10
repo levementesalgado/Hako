@@ -80,6 +80,14 @@ Ordem de args no Port I/O: `outb(0x11, 0x20)` = valor 0x11 na porta 0x20 (valor 
 
 Com auto mode, `read_byte(p) => default` vira `return port_inb(p)` implícito (sem `;`), então `b = read_byte(0x60)` pode usar o retorno diretamente.
 
+```hako
+box pit {
+    init { pit_config(100) }          // Timer a 100 Hz
+    readw { inw(0x40) }
+    writew { outw(0x1234, 0x40) }
+}
+```
+
 ## Block Mode
 
 Código Rust direto quando auto mode não cobre:
