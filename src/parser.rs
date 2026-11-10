@@ -688,7 +688,7 @@ impl Parser {
             "rate" | "ratio" | "percent" | "probability" | "chance" | "weight" | "score"
             | "value_f" | "x_f" | "y_f" | "pos_f" | "temp" | "temperature" | "speed"
             | "velocity" | "accel" | "force" => "f32".into(),
-            // Default: u32 for everything else
+            // Default: u32 for everything else (bate com stdlib Port I/O que é u32)
             _ => "u32".into(),
         }
     }

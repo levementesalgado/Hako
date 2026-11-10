@@ -10,12 +10,12 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - Macros GPIO, 81 testes, CI no GitHub Actions
 - `cargo clippy` 0 warnings, dual license MIT/Apache-2.0
 - `if/else` sem `=>` como forma canônica
+- `inb` com **retorno** (`port_inb` propaga o valor, sem `;` no auto mode)
+- `outb(value, port)` documentado no `SYNTAX.md` (valor primeiro, porta depois)
 
 ## 🔴 Alta prioridade
 
-- `inb(port) -> u8` com **retorno** — hoje o Hako não devolve valores, só chama `port_inb` e descarta. Trava driver de teclado (Mizu `kbd.hako` usa wrapper)
-- `outb(value, port)` — ordem de argumentos já definida, mas falta validação e invariante documentado no `SYNTAX.md`
-- Tipos e inferência: Rust tem `u8`, `&str`, `fn()`; Hako ainda infere por nome. Sem isso não dá pra validar `inb` retornando `u8` vs `u32`
+- Tipos e inferência: Rust tem `u8`, `&str`, `fn()`; Hako infere por nome (`s→&str`, `buf→&[u32]`, resto `u32` batendo com a stdlib). Tipagem `u8` de verdade exige migrar a stdlib `port_inb` de `u32` para `u8` (breaking)
 - `flow` gerando `run()` — hoje `flow boot { serial vga }` vira `flow_boot()`, mas o Mizu usa `flow default { process }` → `flow_default()`. Documentar a convenção
 
 ## 🟡 Média prioridade
