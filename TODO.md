@@ -30,6 +30,5 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 ## 🟢 Baixa prioridade
 
 - Editor com visualização de caixas (emoji) mantendo fonte ASCII (`box`/`inst`)
-- Propagar `Hako` como crate de lib (`lib.rs` existe, mas exemplos tiram bem mais dela)
 - Suporte a `in`/`for in` mais completo (hoje mínimo)
 - `loop` com condição e `break` documentados no `SYNTAX.md` atual
