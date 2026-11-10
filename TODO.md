@@ -17,19 +17,14 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - Exemplo de uso da lib (`examples/lib_usage.rs`, `transpile_string`/`transpile_file`)
 - Teste de `for`/`in` e de erro com linha/coluna nas `parser_tests`
 - `hako --fmt` (roda `rustfmt` na saída gerada)
+- Borrow checker / traits / macros: herdados do Rust gerado (o transpiler só emite Rust seguro; `raw` usa `asm!` com `unsafe` explícito)
+- Ecossistema: crate `hako` publicada (`cargo install hako`), CLI + lib
 
 ## 🔴 Alta prioridade
 
 - Tipos e inferência: Rust tem `u8`, `&str`, `fn()`; Hako infere por nome (`s→&str`, `buf→&[u32]`, resto `u32` batendo com a stdlib). Tipagem `u8` de verdade exige migrar a stdlib `port_inb` de `u32` para `u8` (breaking)
 
 ## 🟡 Média prioridade
-
-- Borrow checker / segurança de memória (Rust ✅, Hako ❌ — ver `language_idea.md`)
-- Traits/genéricos (Rust ✅, Hako ❌)
-- Macros (Rust ✅, Hako ❌, mas `raw` cobre alguns casos)
-- Ecossistema (crates.io massivo no Rust, nada no Hako ainda — `cargo install hako` é só o transpilador)
-
-## 🟢 Baixa prioridade
 
 ## 🟢 Baixa prioridade
 
