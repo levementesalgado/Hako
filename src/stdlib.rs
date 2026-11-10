@@ -5,20 +5,20 @@ pub fn port_outb(value: u32, port: u32) {
     unsafe { core::arch::asm!("out dx, al", in("dx") port as u16, in("al") value as u8); }
 }
 
-pub fn port_inb(port: u32) -> u32 {
+pub fn port_inb(port: u32) -> u8 {
     let result: u8;
     unsafe { core::arch::asm!("in al, dx", in("dx") port as u16, out("al") result); }
-    result as u32
+    result
 }
 
 pub fn port_outw(value: u32, port: u32) {
     unsafe { core::arch::asm!("out dx, ax", in("dx") port as u16, in("ax") value as u16); }
 }
 
-pub fn port_inw(port: u32) -> u32 {
+pub fn port_inw(port: u32) -> u16 {
     let result: u16;
     unsafe { core::arch::asm!("in ax, dx", in("dx") port as u16, out("ax") result); }
-    result as u32
+    result
 }
 
 // --- Serial (COM) ---
@@ -36,7 +36,7 @@ pub fn serial_write_byte(b: u32, com: u32) {
     port_outb(b, com);
 }
 
-pub fn serial_read_byte(com: u32) -> u32 {
+pub fn serial_read_byte(com: u32) -> u8 {
     loop {
         if port_inb(com + 5) & 1 != 0 { break; }
     }
@@ -77,7 +77,7 @@ pub fn uart_write(base: u32, byte: u32) {
     port_outb(byte, base);
 }
 
-pub fn uart_read(base: u32) -> u32 {
+pub fn uart_read(base: u32) -> u8 {
     while port_inb(base + 5) & 1 == 0 {}
     port_inb(base)
 }
@@ -218,7 +218,7 @@ pub fn vga_read_cursor() -> (u32, u32) {
     let hi = port_inb(0x3D5);
     port_outb(15, 0x3D4);
     let lo = port_inb(0x3D5);
-    let pos = (hi << 8) | lo;
+    let pos = ((hi as u32) << 8) | lo as u32;
     (pos % 80, pos / 80)
 }
 

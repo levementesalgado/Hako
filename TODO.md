@@ -19,12 +19,11 @@ DSL de boxes/flows otimizada pra LLM. Transpila pra Rust puro.
 - `hako --fmt` (roda `rustfmt` na saída gerada)
 - `hako view` (visualização ASCII de boxes/flows, fonte ASCII preservada)
 - Exemplos `examples/*.hako` reescritos na sintaxe atual (todos parseiam via `hako view`)
+- `port_inb -> u8` e `port_inw -> u16` na stdlib (tipagem correta do `in al/ax`)
 - Borrow checker / traits / macros: herdados do Rust gerado (o transpiler só emite Rust seguro; `raw` usa `asm!` com `unsafe` explícito)
 - Ecossistema: crate `hako` publicada (`cargo install hako`), CLI + lib
 
 ## 🔴 Alta prioridade
-
-- Tipos e inferência: Rust tem `u8`, `&str`, `fn()`; Hako infere por nome (`s→&str`, `buf→&[u32]`, resto `u32` batendo com a stdlib). Tipagem `u8` de verdade exige migrar a stdlib `port_inb` de `u32` para `u8` (breaking)
 
 ## 🟡 Média prioridade
 

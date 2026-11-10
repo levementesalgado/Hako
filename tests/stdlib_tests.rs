@@ -11,6 +11,15 @@ fn test_stdlib_contains_port_io() {
 }
 
 #[test]
+fn test_stdlib_port_io_types() {
+    // in al -> u8, in ax -> u16 (sem cast artificial pra u32)
+    assert!(STDLIB.contains("pub fn port_inb(port: u32) -> u8"));
+    assert!(STDLIB.contains("pub fn port_inw(port: u32) -> u16"));
+    assert!(STDLIB.contains("pub fn serial_read_byte(com: u32) -> u8"));
+    assert!(STDLIB.contains("pub fn uart_read(base: u32) -> u8"));
+}
+
+#[test]
 fn test_stdlib_contains_serial() {
     assert!(STDLIB.contains("pub fn serial_config("));
     assert!(STDLIB.contains("pub fn serial_write_byte("));
