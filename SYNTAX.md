@@ -165,13 +165,19 @@ loop {
 ```hako
 box led {
     PIN = 21
+    gpio_output(pin) => default
+    gpio_write(pin, value) => default
     init { gpio_output(PIN) }
     on { gpio_write(PIN, 1) }
     off { gpio_write(PIN, 0) }
+    run {
+        init()
+        on()
+    }
 }
 ```
 
-LLM gera `init()`, `on()`, `off()` sem saber que PIN=21.
+LLM gera `init()`, `on()`, `off()` sem saber que PIN=21. Em block mode, chamadas sem prefixo resolvem pra funções do próprio box (os wrappers `gpio_output`/`gpio_write`).
 
 ### Sensor I2C (sequência complexa, nomes claros)
 
@@ -179,7 +185,11 @@ LLM gera `init()`, `on()`, `off()` sem saber que PIN=21.
 box sensor {
     SDA = 2
     SCL = 3
-    read {
+    i2c_init(sda, scl) => default
+    i2c_start(sda, scl) => default
+    i2c_stop(sda, scl) => default
+    i2c_write_byte(sda, scl, byte) => default
+    run {
         i2c_init(SDA, SCL)
         i2c_start(SDA, SCL)
         i2c_write_byte(SDA, SCL, 0xEC)
@@ -191,16 +201,22 @@ box sensor {
 ### UART Echo (flow explícito)
 
 ```hako
-box uart {
-    BASE = 0x3F8
-    init { uart_init(BASE) }
-    echo {
-        init()
+box serial {
+    COM1 = 0x3F8
+    config => default
+    read_byte => default
+    write_byte(b) => default
+    run {
+        config()
         loop {
-            let b = uart_read(BASE)
-            uart_write(BASE, b)
+            let b = read_byte()
+            write_byte(b as u32)
         }
     }
+}
+
+flow default {
+    serial
 }
 ```
 
