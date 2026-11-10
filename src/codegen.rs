@@ -86,7 +86,14 @@ impl Codegen {
             self.result.push_str(": ");
             self.result.push_str(pt);
         }
-        self.result.push_str(") {\n");
+        self.result.push(')');
+        if let FnMode::Auto = mode {
+            if let Some(ret) = Self::auto_fn_ret(name) {
+                self.result.push_str(" -> ");
+                self.result.push_str(ret);
+            }
+        }
+        self.result.push_str(" {\n");
 
         match mode {
             FnMode::Auto => {
@@ -210,6 +217,18 @@ impl Codegen {
         for (_, var) in &outputs {
             self.result
                 .push_str(&format!("        let {} = __out_{};\n", var, var));
+        }
+    }
+
+    /// Rust return type of the stdlib function backing an auto-mode name.
+    fn auto_fn_ret(name: &str) -> Option<&'static str> {
+        match name {
+            "read_byte" | "uart_read" | "inb" => Some("u8"),
+            "inw" => Some("u16"),
+            "read_str" => Some("[u8; 256]"),
+            "spi_transfer" | "spi_transfer_byte" | "i2c_read_bit" | "i2c_write_byte"
+            | "gpio_read" => Some("u32"),
+            _ => None,
         }
     }
 

@@ -189,19 +189,32 @@ pub fn gpio_read(pin: u32) -> u32 {
 
 // --- GPIO Pin Macros ---
 // These provide named pin access for common boards
-pub macro pin($port:expr, $pin:expr) { ($port * 8 + $pin) }
-pub macro led_green() { pin!(0, 0) }
-pub macro led_red() { pin!(0, 1) }
-pub macro led_blue() { pin!(0, 2) }
-pub macro btn_s1() { pin!(1, 0) }
-pub macro btn_s2() { pin!(1, 1) }
-pub macro btn_s3() { pin!(1, 2) }
-pub macro spi_mosi() { pin!(2, 3) }
-pub macro spi_miso() { pin!(2, 4) }
-pub macro spi_sclk() { pin!(2, 5) }
-pub macro spi_cs() { pin!(2, 6) }
-pub macro i2c_sda() { pin!(3, 0) }
-pub macro i2c_scl() { pin!(3, 1) }
+#[macro_export]
+macro_rules! pin { ($port:expr, $pin:expr) => { $port * 8 + $pin }; }
+#[macro_export]
+macro_rules! led_green { () => { $crate::pin!(0, 0) }; }
+#[macro_export]
+macro_rules! led_red { () => { $crate::pin!(0, 1) }; }
+#[macro_export]
+macro_rules! led_blue { () => { $crate::pin!(0, 2) }; }
+#[macro_export]
+macro_rules! btn_s1 { () => { $crate::pin!(1, 0) }; }
+#[macro_export]
+macro_rules! btn_s2 { () => { $crate::pin!(1, 1) }; }
+#[macro_export]
+macro_rules! btn_s3 { () => { $crate::pin!(1, 2) }; }
+#[macro_export]
+macro_rules! spi_mosi { () => { $crate::pin!(2, 3) }; }
+#[macro_export]
+macro_rules! spi_miso { () => { $crate::pin!(2, 4) }; }
+#[macro_export]
+macro_rules! spi_sclk { () => { $crate::pin!(2, 5) }; }
+#[macro_export]
+macro_rules! spi_cs { () => { $crate::pin!(2, 6) }; }
+#[macro_export]
+macro_rules! i2c_sda { () => { $crate::pin!(3, 0) }; }
+#[macro_export]
+macro_rules! i2c_scl { () => { $crate::pin!(3, 1) }; }
 
 // --- VGA text mode ---
 pub fn vga_put_char(c: u32, x: u32, y: u32) {
@@ -225,7 +238,7 @@ pub fn vga_read_cursor() -> (u32, u32) {
 pub fn vga_write_str(s: &str) {
     let (mut x, mut y) = vga_read_cursor();
     for c in s.bytes() {
-        if c == b'\\n' { x = 0; y += 1; continue; }
+        if c == b'\n' { x = 0; y += 1; continue; }
         vga_put_char(c as u32, x, y);
         x += 1;
         if x >= 80 { x = 0; y += 1; }

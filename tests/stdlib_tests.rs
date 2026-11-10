@@ -88,6 +88,21 @@ fn test_stdlib_uses_no_std() {
 }
 
 #[test]
+fn test_stdlib_no_double_escapes() {
+    // STDLIB é raw string (r##"..."##); `b'\\n'` viraria char literal inválido.
+    assert!(!STDLIB.contains("\\\\"));
+    assert!(STDLIB.contains("b'\\n'"));
+}
+
+#[test]
+fn test_stdlib_macros_are_stable() {
+    // `pub macro` é experimental (decl_macro); usa-se macro_rules!.
+    assert!(!STDLIB.contains("pub macro"));
+    assert!(STDLIB.contains("macro_rules! pin"));
+    assert!(STDLIB.contains("macro_rules! led_green"));
+}
+
+#[test]
 fn test_stdlib_serial_config_logic() {
     assert!(STDLIB.contains("port_outb(0x80, com + 3)"));
     assert!(STDLIB.contains("port_outb(1, com)"));

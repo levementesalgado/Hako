@@ -77,6 +77,7 @@ box kbd {
 }
 "#;
     let output = transpile(input);
+    assert!(output.contains("pub fn inb(p: u32) -> u8"));
     assert!(output.contains("crate::hako_stdlib::port_inb(p)"));
     assert!(!output.contains("crate::hako_stdlib::port_inb(p);"));
 }
